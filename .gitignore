@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.bak
+*.bak2
+*.bak3
+app/core/_archive/
+app/core/typification_engine_backup_*.py
+_backup_core_*/

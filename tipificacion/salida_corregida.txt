@@ -1,0 +1,84 @@
+﻿======================================================================
+CASO: El informe fue presentado dentro del plazo establecido.
+TIPO: SIN INDICIO DE INCUMPLIMIENTO (SUJETO A VERIFICACION)
+NIVEL: SIN MERITO PRELIMINAR - REQUIERE VERIFICACION DOCUMENTAL
+ACREDITADOS: ['Afirmacion preliminar de cumplimiento de plazo (a verificar documentalmente).']
+MATRIZ: [
+  {
+    "dimension": "ETAPA",
+    "contenido": "REMISION - DENTRO_DE_PLAZO",
+    "fundamento": "Evento identificado preliminarmente; requiere contraste con fechas y norma.",
+    "prioridad": "MEDIA",
+    "hecho_origen": "El informe fue presentado dentro del plazo establecido."
+  }
+]
+======================================================================
+CASO: El informe fue presentado fuera del plazo establecido.
+TIPO: INCUMPLIMIENTO DE PLAZO (REMISION)
+NIVEL: INDICIO PRELIMINAR DE INCUMPLIMIENTO - REQUIERE VERIFICACION NORMATIVA Y PROBATORIA
+ACREDITADOS: ['Afirmacion preliminar de incumplimiento de plazo (a verificar documentalmente).']
+MATRIZ: [
+  {
+    "dimension": "ETAPA",
+    "contenido": "REMISION - FUERA_DE_PLAZO",
+    "fundamento": "Evento identificado preliminarmente; requiere contraste con fechas y norma.",
+    "prioridad": "ALTA",
+    "hecho_origen": "El informe fue presentado fuera del plazo establecido."
+  }
+]
+======================================================================
+CASO: El informe fue elaborado dentro del plazo establecido y posteriormente remitido fuera del plazo.
+TIPO: INCUMPLIMIENTO DE PLAZO (REMISION)
+NIVEL: INDICIO PRELIMINAR DE INCUMPLIMIENTO - REQUIERE VERIFICACION NORMATIVA Y PROBATORIA
+ACREDITADOS: ['Afirmacion preliminar de cumplimiento de plazo (a verificar documentalmente).', 'Afirmacion preliminar de incumplimiento de plazo (a verificar documentalmente).']
+MATRIZ: [
+  {
+    "dimension": "ETAPA",
+    "contenido": "ELABORACION - DENTRO_DE_PLAZO",
+    "fundamento": "Evento identificado preliminarmente; requiere contraste con fechas y norma.",
+    "prioridad": "MEDIA",
+    "hecho_origen": "El informe fue elaborado dentro del plazo establecido y posteriormente remitido fuera del plazo."
+  },
+  {
+    "dimension": "ETAPA",
+    "contenido": "REMISION - FUERA_DE_PLAZO",
+    "fundamento": "Evento identificado preliminarmente; requiere contraste con fechas y norma.",
+    "prioridad": "ALTA",
+    "hecho_origen": "El informe fue elaborado dentro del plazo establecido y posteriormente remitido fuera del plazo."
+  }
+]
+======================================================================
+CASO: El informe fue elaborado dentro del plazo establecido, pero no fue remitido.
+TIPO: OMISION (NO REMISION)
+NIVEL: INDICIO PRELIMINAR DE INCUMPLIMIENTO - REQUIERE VERIFICACION NORMATIVA Y PROBATORIA
+ACREDITADOS: ['Afirmacion preliminar de cumplimiento de plazo (a verificar documentalmente).', 'Afirmacion preliminar de no remision (a verificar).']
+MATRIZ: [
+  {
+    "dimension": "ETAPA",
+    "contenido": "ELABORACION - DENTRO_DE_PLAZO",
+    "fundamento": "Evento identificado preliminarmente; requiere contraste con fechas y norma.",
+    "prioridad": "MEDIA",
+    "hecho_origen": "El informe fue elaborado dentro del plazo establecido, pero no fue remitido."
+  },
+  {
+    "dimension": "ETAPA",
+    "contenido": "REMISION - NO_EJECUTADO",
+    "fundamento": "Evento identificado preliminarmente; requiere contraste con fechas y norma.",
+    "prioridad": "ALTA",
+    "hecho_origen": "El informe fue elaborado dentro del plazo establecido, pero no fue remitido."
+  }
+]
+======================================================================
+CASO: El informe fue elaborado fuera del plazo y posteriormente remitido.
+TIPO: INCUMPLIMIENTO DE PLAZO (ELABORACION)
+NIVEL: INDICIO PRELIMINAR DE INCUMPLIMIENTO - REQUIERE VERIFICACION NORMATIVA Y PROBATORIA
+ACREDITADOS: ['Afirmacion preliminar de incumplimiento de plazo (a verificar documentalmente).']
+MATRIZ: [
+  {
+    "dimension": "ETAPA",
+    "contenido": "ELABORACION - FUERA_DE_PLAZO",
+    "fundamento": "Evento identificado preliminarmente; requiere contraste con fechas y norma.",
+    "prioridad": "ALTA",
+    "hecho_origen": "El informe fue elaborado fuera del plazo y posteriormente remitido."
+  }
+]
