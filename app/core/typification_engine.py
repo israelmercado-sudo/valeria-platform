@@ -1646,7 +1646,7 @@ class TypificationEngine:
             indicador in texto_plano
             for indicador in indicadores_omision
         ):
-            return "OMISION"
+            return "OMISIÓN"
 
         indicadores_accion = [
             "realizo",
@@ -1669,7 +1669,7 @@ class TypificationEngine:
             indicador in texto_plano
             for indicador in indicadores_accion
         ):
-            return "ACCION"
+            return "ACCIÓN"
 
         return "NO DETERMINADO"
 
