@@ -553,7 +553,20 @@ class TypificationEngine:
         if r.tipo_conducta in ("CUMPLIMIENTO", "NO DETERMINADO"):
             r.normas_candidatas = []
             r.preguntas_para_el_usuario = []
-            r.estado_tipificacion = "SIN_FALTA_CANDIDATA"
+            r.informacion_faltante = []
+            r.observaciones = [
+                o for o in r.observaciones if not o.startswith("RIESGO")
+            ]
+            if r.tipo_conducta == "CUMPLIMIENTO":
+                r.estado_tipificacion = "SIN_FALTA_CANDIDATA"
+                r.nivel_conclusion = (
+                    "SIN INDICIOS DE INCUMPLIMIENTO EN LA CONDUCTA DESCRITA"
+                )
+            else:
+                r.estado_tipificacion = "CONDUCTA_NO_CLASIFICADA"
+                r.nivel_conclusion = (
+                    "CONDUCTA NO CLASIFICADA: REQUIERE AN\u00c1LISIS ADICIONAL"
+                )
             return r
 
         def hay(x):
