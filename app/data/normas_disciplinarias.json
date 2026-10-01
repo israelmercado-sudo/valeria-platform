@@ -1,0 +1,58 @@
+[
+  {
+    "id": "LEY30057_ART85_A",
+    "norma": "Ley 30057 - Ley del Servicio Civil",
+    "articulo": "85",
+    "inciso": "a",
+    "texto": "<<COPIAR LITERAL DESDE EL PERUANO>>",
+    "regimen": ["30057"],
+    "gatillos": [
+      "OMISIÓN - NO ELABORACIÓN",
+      "OMISIÓN - NO REMISIÓN",
+      "INCUMPLIMIENTO DE PLAZO (ELABORACIÓN)",
+      "INCUMPLIMIENTO DE PLAZO (REMISIÓN)"
+    ],
+    "requiere_deber": true,
+    "preguntas_pendientes": [
+      "¿Qué norma de la Ley 30057 o su Reglamento se incumplió?"
+    ],
+    "verificado": false
+  },
+  {
+    "id": "LEY30057_ART85_D",
+    "norma": "Ley 30057 - Ley del Servicio Civil",
+    "articulo": "85",
+    "inciso": "d",
+    "texto": "<<COPIAR LITERAL>>",
+    "regimen": ["30057"],
+    "gatillos": [
+      "OMISIÓN - NO ELABORACIÓN",
+      "OMISIÓN - NO REMISIÓN",
+      "INCUMPLIMIENTO DE PLAZO (ELABORACIÓN)",
+      "INCUMPLIMIENTO DE PLAZO (REMISIÓN)"
+    ],
+    "requiere_deber": true,
+    "preguntas_pendientes": [
+      "¿Cuál es la función asignada en el ROF/MOF o en el contrato?",
+      "¿Hubo negligencia o existe una causa justificante?"
+    ],
+    "verificado": false
+  },
+  {
+    "id": "TUO27444_DEBERES_AUTORIDADES",
+    "norma": "TUO de la Ley 27444 - Ley del Procedimiento Administrativo General",
+    "articulo": "<<VERIFICAR>>",
+    "inciso": "",
+    "texto": "<<COPIAR LITERAL>>",
+    "regimen": ["30057", "276", "728", "CAS"],
+    "gatillos": [
+      "INCUMPLIMIENTO DE PLAZO (ELABORACIÓN)",
+      "INCUMPLIMIENTO DE PLAZO (REMISIÓN)"
+    ],
+    "requiere_deber": true,
+    "preguntas_pendientes": [
+      "¿Qué plazo del procedimiento administrativo se incumplió?"
+    ],
+    "verificado": false
+  }
+]

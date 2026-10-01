@@ -1,0 +1,391 @@
+﻿    def _determinar_tipo_conducta(self, conducta: str) -> str:
+        """
+        Clasificacion preliminar de la conducta.
+
+        V3.5 - Segmentacion por eventos.
+        """
+        texto = (conducta or "").lower().strip()
+        import unicodedata
+        texto_plano = "".join(
+            c for c in unicodedata.normalize("NFD", texto)
+            if unicodedata.category(c) != "Mn"
+        )
+
+        eventos = self._parsear_eventos(texto)
+
+        etapas_incumplidas = [
+            (etapa, estado)
+            for etapa, estado in eventos
+            if estado in ("FUERA_DE_PLAZO", "NO_EJECUTADO")
+        ]
+
+        if etapas_incumplidas:
+            partes = []
+            vistos = set()
+
+            for etapa, estado in etapas_incumplidas:
+
+                clave = (etapa, estado)
+
+                if clave in vistos:
+                    continue
+
+                vistos.add(clave)
+
+                if etapa == "ELABORACION" and estado == "FUERA_DE_PLAZO":
+                    partes.append(
+                        "INCUMPLIMIENTO DE PLAZO (ELABORACIÓN)"
+                    )
+
+                elif etapa == "REMISION" and estado == "FUERA_DE_PLAZO":
+                    partes.append(
+                        "INCUMPLIMIENTO DE PLAZO (PRESENTACIÓN)"
+                    )
+
+                elif etapa == "PRESENTACION" and estado == "FUERA_DE_PLAZO":
+                    partes.append(
+                        "INCUMPLIMIENTO DE PLAZO (REMISIÓN)"
+                    )
+
+                elif etapa == "REMISION" and estado == "NO_EJECUTADO":
+                    partes.append(
+                        "OMISIÓN - NO REMISIÓN"
+                    )
+
+                elif etapa == "PRESENTACION" and estado == "NO_EJECUTADO":
+                    partes.append(
+                        "OMISIÓN - NO PRESENTACIÓN"
+                    )
+
+                elif etapa == "ELABORACION" and estado == "NO_EJECUTADO":
+                    partes.append(
+                        "OMISIÓN - NO ELABORACIÓN"
+                    )
+
+            if partes:
+                return " + ".join(dict.fromkeys(partes))
+
+        if eventos:
+            return "CUMPLIMIENTO"
+
+        indicadores_cumplimiento = [
+            "cumplio",
+            "cumplio oportunamente",
+            "cumplio dentro del plazo",
+            "presento dentro del plazo",
+            "remitio dentro del plazo",
+            "elaboro dentro del plazo",
+        ]
+
+        if any(
+            indicador in texto_plano
+            for indicador in indicadores_cumplimiento
+        ):
+            return "CUMPLIMIENTO"
+
+        indicadores_omision = [
+            "no realizo",
+            "no cumplio",
+            "no efectuo",
+            "no informo",
+            "no comunico",
+            "no atendio",
+            "no verifico",
+            "no aprobo",
+            "no emitio",
+            "dejo de",
+            "incumplio",
+            "omitio",
+        ]
+
+        if any(
+            indicador in texto_plano
+            for indicador in indicadores_omision
+        ):
+            return "OMISIÓN"
+
+        indicadores_accion = [
+            "realizo",
+            "efectuo",
+            "presento",
+            "autorizo",
+            "emitio",
+            "dispuso",
+            "ordeno",
+            "suscribio",
+            "remitio",
+            "comunico",
+            "atendio",
+            "verifico",
+            "aprobo",
+            "elaboro",
+        ]
+
+        if any(
+            indicador in texto_plano
+            for indicador in indicadores_accion
+        ):
+            return "ACCIÓN"
+
+        return "NO DETERMINADO"
+
+    def _reconciliar_modalidades_temporales(self, conducta: str) -> dict:
+        """
+        V3.5.2 - Reconciliación temporal por modalidad.
+
+        Utiliza _parsear_eventos() como fuente única de eventos.
+
+        Distingue:
+            - modalidad positiva ejecutada;
+            - modalidad negativa por NO_EJECUTADO;
+            - componente temporal de cada modalidad.
+
+        La temporalidad global se mantiene separada de la
+        temporalidad específica de cada modalidad.
+        """
+
+        eventos = self._parsear_eventos(conducta)
+
+        mapa_modalidad = {
+            "ELABORACION": "ELABORACIÓN",
+            "REMISION": "REMISIÓN",
+            "PRESENTACION": "PRESENTACIÓN",
+        }
+
+        mapa_modalidad_negativa = {
+            "ELABORACION": "NO ELABORACIÓN",
+            "REMISION": "NO REMISIÓN",
+            "PRESENTACION": "NO PRESENTACIÓN",
+        }
+
+        mapa_estado = {
+            "DENTRO_DE_PLAZO": "CUMPLIMIENTO DE PLAZO",
+            "FUERA_DE_PLAZO": "INCUMPLIMIENTO DE PLAZO",
+            "NO_EJECUTADO": "SIN INFORMACIÓN TEMPORAL",
+            "SIN_INFORMACION_TEMPORAL": "SIN INFORMACIÓN TEMPORAL",
+        }
+
+        modalidades = []
+        detalles = []
+
+        for etapa, estado in eventos:
+
+            if estado == "NO_EJECUTADO":
+                modalidad = mapa_modalidad_negativa.get(etapa)
+            else:
+                modalidad = mapa_modalidad.get(etapa)
+
+            if modalidad is None:
+                continue
+
+            if modalidad not in modalidades:
+                modalidades.append(modalidad)
+
+            detalle = {
+                "modalidad": modalidad,
+                "componente_temporal": mapa_estado.get(
+                    estado,
+                    "SIN INFORMACIÓN TEMPORAL",
+                ),
+            }
+
+            if not any(
+                d["modalidad"] == modalidad
+                for d in detalles
+            ):
+                detalles.append(detalle)
+
+        # =========================================================
+        # TEMPORALIDAD GLOBAL
+        #
+        # Prioridad:
+        # 1. cualquier incumplimiento explícito;
+        # 2. cualquier cumplimiento explícito;
+        # 3. sin información temporal.
+        #
+        # NO_EJECUTADO no constituye por sí mismo una
+        # clasificación temporal de cumplimiento/incumplimiento.
+        # =========================================================
+
+        estados = [estado for _, estado in eventos]
+
+        if "FUERA_DE_PLAZO" in estados:
+            componente_temporal = "INCUMPLIMIENTO DE PLAZO"
+        elif "DENTRO_DE_PLAZO" in estados:
+            componente_temporal = "CUMPLIMIENTO DE PLAZO"
+        else:
+            componente_temporal = "SIN INFORMACIÓN TEMPORAL"
+
+        return {
+            "modalidades": modalidades,
+            "componente_temporal": componente_temporal,
+            "modalidades_detalle": detalles,
+        }
+
+    def _extraer_modalidades_conducta(self, conducta: str) -> dict:
+        """
+        V3.4.3
+        Extrae la conducta principal, modalidades negativas/asociadas
+        y componente temporal.
+
+        No determina responsabilidad disciplinaria ni realiza
+        tipificación jurídica definitiva.
+        """
+
+        import re
+
+        texto = (conducta or "").lower().strip()
+
+        resultado = {
+            "tipo_principal": "NO DETERMINADO",
+            "modalidades": [],
+            "componente_temporal": "SIN INFORMACIÓN TEMPORAL"
+        }
+
+        def contiene(patron):
+            return re.search(patron, texto, flags=re.IGNORECASE) is not None
+
+        def agregar(modalidad):
+            if modalidad not in resultado["modalidades"]:
+                resultado["modalidades"].append(modalidad)
+
+        # ============================================================
+        # 1. COMPONENTE TEMPORAL
+        # ============================================================
+
+        patrones_cumplimiento = [
+            r"\bpresent[oó]\b.{0,100}\bdentro del plazo\b",
+            r"\bremiti[oó]\b.{0,100}\bdentro del plazo\b",
+            r"\belabor[oó]\b.{0,100}\bdentro del plazo\b",
+            r"\bcumpli[oó]\b.{0,100}\bdentro del plazo\b",
+            r"\bcumpli[oó]\b.{0,100}\boportunamente\b",
+            r"\bde manera oportuna\b",
+            r"\boportunamente\b"
+        ]
+
+        patrones_incumplimiento = [
+            r"\bfuera del plazo\b",
+            r"\bfuera de plazo\b",
+            r"\bvencido el plazo\b",
+            r"\bdespu[eé]s del plazo\b",
+            r"\bposterior al plazo\b",
+            r"\bextempor[aá]neamente\b",
+            r"\bde manera extempor[aá]nea\b",
+            r"\btard[ií]amente\b",
+            r"\bfuera del t[eé]rmino\b",
+            r"\bno cumpli[oó]\b.{0,100}\bdentro del plazo\b",
+            r"\bno fue presentado\b.{0,100}\bdentro del plazo\b",
+            r"\bno fue remitido\b.{0,100}\bdentro del plazo\b",
+            r"\bno fue elaborado\b.{0,100}\bdentro del plazo\b",
+            r"\bno present[oó]\b.{0,100}\bdentro del plazo\b",
+            r"\bno remiti[oó]\b.{0,100}\bdentro del plazo\b",
+            r"\bno elabor[oó]\b.{0,100}\bdentro del plazo\b"
+        ]
+
+        if any(contiene(p) for p in patrones_cumplimiento):
+            resultado["componente_temporal"] = "CUMPLIMIENTO DE PLAZO"
+
+        if any(contiene(p) for p in patrones_incumplimiento):
+            resultado["componente_temporal"] = "INCUMPLIMIENTO DE PLAZO"
+
+        # ============================================================
+        # 2. MODALIDADES NEGATIVAS
+        # ============================================================
+
+        if any(contiene(p) for p in [
+            r"\bno fue elaborado\b",
+            r"\bno fue elaborada\b",
+            r"\bno elabor[oó]\b",
+            r"\bno se elabor[oó]\b",
+            r"\bomiti[oó] elaborar\b",
+            r"\bomiti[oó] la elaboraci[oó]n\b"
+        ]):
+            agregar("NO ELABORACIÓN")
+
+        # Coordinación negativa: "no fue elaborado ni remitido"
+        if any(contiene(p) for p in [
+            r"\bno fue elaborado\s+ni\s+remitido\b",
+            r"\bno fue elaborada\s+ni\s+remitida\b",
+            r"\bno fue elaborado\s+ni\s+enviado\b",
+            r"\bno fue elaborada\s+ni\s+enviada\b"
+        ]):
+            agregar("NO REMISIÓN")
+
+        if any(contiene(p) for p in [
+            r"\bno fue remitido\b",
+            r"\bno fue remitida\b",
+            r"\bno remiti[oó]\b",
+            r"\bno se remiti[oó]\b",
+            r"\bomiti[oó] remitir\b",
+            r"\bomiti[oó] la remisi[oó]n\b"
+        ]):
+            agregar("NO REMISIÓN")
+
+        if any(contiene(p) for p in [
+            r"\bno fue presentado\b",
+            r"\bno fue presentada\b",
+            r"\bno fueron presentados\b",
+            r"\bno fueron presentadas\b",
+            r"\bno present[oó]\b",
+            r"\bno se present[oó]\b",
+            r"\bomiti[oó] presentar\b",
+            r"\bomiti[oó] la presentaci[oó]n\b"
+        ]):
+            agregar("NO PRESENTACIÓN")
+
+        if any(contiene(p) for p in [
+            r"\bsin verificar\b",
+            r"\bsin haber verificado\b",
+            r"\bno verific[oó]\b",
+            r"\bno se verific[oó]\b",
+            r"\bomiti[oó] verificar\b",
+            r"\bomiti[oó] realizar la verificaci[oó]n\b",
+            r"\bomiti[oó] la verificaci[oó]n\b"
+        ]):
+            agregar("NO VERIFICACIÓN")
+
+        # Revision general de negaciones (pronombres, coordinacion
+        # activa, omitio/dejo de + infinitivo, notificar, etc.)
+        for _clave, _modalidad in [
+            ("ELABORACION", "NO ELABORACIÓN"),
+            ("REMISION", "NO REMISIÓN"),
+            ("PRESENTACION", "NO PRESENTACIÓN"),
+            ("VERIFICACION", "NO VERIFICACIÓN"),
+            ("NOTIFICACION", "NO NOTIFICACIÓN"),
+            ("EMISION", "NO EMISIÓN"),
+            ("SUSCRIPCION", "NO SUSCRIPCIÓN"),
+            ("AUTORIZACION", "NO AUTORIZACIÓN"),
+        ]:
+            if accion_negada(texto, _clave):
+                agregar(_modalidad)
+
+        # ============================================================
+        # 3. CONDUCTAS POSITIVAS
+        # ============================================================
+
+        # Límites de palabra para impedir falsos positivos.
+        # Ejemplo: "emitió" NO debe detectarse dentro de "remitió".
+
+        # PRESENTACIÓN: formas activas y pasivas.
+        # Se excluyen expresamente las construcciones negativas.
+        if (
+            (
+                contiene(r"\bpresent[oó]\b")
+                and not contiene(r"\bno present[oó]\b")
+            )
+            or
+            (
+                contiene(r"\bfue presentado\b")
+                or contiene(r"\bfue presentada\b")
+                or contiene(r"\bfueron presentados\b")
+                or contiene(r"\bfueron presentadas\b")
+            )
+        ) and not any(contiene(p) for p in [
+            r"\bno fue presentado\b",
+            r"\bno fue presentada\b",
+            r"\bno fueron presentados\b",
+            r"\bno fueron presentadas\b"
+        ]):
+            agregar("PRESENTACIÓN")
+
+        if accion_positiva(texto, "REMISION"):

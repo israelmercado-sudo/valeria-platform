@@ -1,6 +1,9 @@
-﻿import re
+from app.core.negaciones import contexto_niega, omisiones, accion_positiva, accion_negada
+import re
 from dataclasses import dataclass, asdict, field
 from typing import List, Dict, Any
+from app.core.base_normativa import BaseNormativa
+from app.core.plazos import CalculadorPlazos
 
 
 @dataclass
@@ -26,6 +29,10 @@ class TypificationResult:
     modalidades: List[str] = field(default_factory=list)
     componente_temporal: str = "SIN INFORMACIÓN TEMPORAL"
     modalidades_detalle: List[Dict[str, str]] = field(default_factory=list)
+    normas_candidatas: List[Dict[str, Any]] = field(default_factory=list)
+    preguntas_para_el_usuario: List[str] = field(default_factory=list)
+    estado_tipificacion: str = "INFORMACION_INSUFICIENTE"
+    calculo_plazo: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -48,6 +55,10 @@ class TypificationEngine:
     - Mantiene carácter preliminar y no determina responsabilidad.
     """
 
+    def __init__(self):
+        self.base = BaseNormativa()
+        self.plazos = CalculadorPlazos()
+
     def analizar(
         self,
         conducta: str,
@@ -56,6 +67,13 @@ class TypificationEngine:
         normas: List[str] = None,
         hechos: List[str] = None,
         evidencia: List[str] = None,
+        regimen: str = None,
+        funcion: str = None,
+        fuente_funcion: str = None,
+        norma_plazo: str = None,
+        fecha_inicio_computo: str = None,
+        plazo_dias_habiles: int = None,
+        fecha_real: str = None,
     ) -> TypificationResult:
 
         if not conducta or not conducta.strip():
@@ -401,7 +419,29 @@ class TypificationEngine:
         # 15. RETORNO
         # =========================================================
 
-        return TypificationResult(
+        # BASE NORMATIVA (candidatas, no altera la logica previa)
+        _candidatas = self.base.candidatas(tipo_conducta, regimen)
+
+        normas_candidatas = [
+            {
+                "id": n["id"],
+                "cita": f'{n["norma"]}, art. {n["articulo"]}'
+                + (f', inciso {n["inciso"]}' if n["inciso"] else ""),
+                "verificado": n["verificado"],
+                "advertencia": (
+                    ""
+                    if n["verificado"]
+                    else "Norma pendiente de verificación por operador jurídico."
+                ),
+            }
+            for n in _candidatas
+        ]
+
+        preguntas_para_el_usuario = sorted(
+            {p for n in _candidatas for p in n["preguntas_pendientes"]}
+        )
+
+        resultado = TypificationResult(
             conducta_identificada=conducta_limpia,
             tipo_conducta=tipo_conducta,
             deber_presuntamente_incumplido=(
@@ -427,7 +467,22 @@ class TypificationEngine:
             modalidades=modalidades,
             componente_temporal=componente_temporal,
             modalidades_detalle=modalidades_detalle,
+            normas_candidatas=normas_candidatas,
+            preguntas_para_el_usuario=preguntas_para_el_usuario,
         )
+
+        resultado = self._aplicar_paso4(
+            resultado,
+            funcion or deber,
+            fuente_funcion or "; ".join(normas or []),
+            norma_plazo,
+            fecha_inicio_computo,
+            regimen,
+        )
+        resultado.calculo_plazo = self._calcular_plazo(
+            resultado, fecha_inicio_computo, plazo_dias_habiles, fecha_real
+        )
+        return resultado
 
     # =============================================================
     # MÉTODOS AUXILIARES
@@ -438,6 +493,99 @@ class TypificationEngine:
     # =============================================================
 
 
+
+    def _calcular_plazo(self, r, fecha_inicio, plazo_dias, fecha_real):
+        """Calcula vencimiento y retraso. No modifica la clasificacion."""
+        if not fecha_inicio or not plazo_dias:
+            return {}
+
+        from datetime import datetime
+
+        advertencias = []
+        try:
+            venc = self.plazos.vencimiento(fecha_inicio, int(plazo_dias))
+        except (ValueError, TypeError):
+            return {
+                "advertencias": [
+                    "Fecha de inicio o plazo invalidos. Use AAAA-MM-DD y un numero entero."
+                ]
+            }
+
+        calculo = {
+            "fecha_inicio": str(fecha_inicio),
+            "plazo_dias_habiles": int(plazo_dias),
+            "vencimiento": str(venc),
+            "dias_retraso": None,
+            "advertencias": advertencias,
+        }
+
+        if not self.plazos.verificado:
+            advertencias.append(
+                "Calendario de feriados pendiente de verificacion: "
+                "el vencimiento puede variar en uno o mas dias."
+            )
+
+        if fecha_real:
+            try:
+                real = datetime.strptime(str(fecha_real), "%Y-%m-%d").date()
+                retraso = self.plazos.dias_de_retraso(venc, real)
+                calculo["fecha_real"] = str(fecha_real)
+                calculo["dias_retraso"] = retraso
+                tipo = r.tipo_conducta or ""
+                if retraso > 0 and tipo == "CUMPLIMIENTO":
+                    advertencias.append(
+                        "Inconsistencia: el texto indica cumplimiento pero la fecha real "
+                        "es posterior al vencimiento calculado."
+                    )
+                if retraso == 0 and "PLAZO" in tipo:
+                    advertencias.append(
+                        "Inconsistencia: el texto indica incumplimiento de plazo pero la "
+                        "fecha real esta dentro del vencimiento calculado."
+                    )
+            except ValueError:
+                advertencias.append("Fecha real invalida. Use AAAA-MM-DD.")
+
+        return calculo
+
+    def _aplicar_paso4(self, r, funcion, fuente_funcion, norma_plazo,
+                       fecha_inicio_computo, regimen):
+        """Capa Paso 4: estado y preguntas segun funcion, fuente, plazo y regimen."""
+        if r.tipo_conducta in ("CUMPLIMIENTO", "NO DETERMINADO"):
+            r.normas_candidatas = []
+            r.preguntas_para_el_usuario = []
+            r.estado_tipificacion = "SIN_FALTA_CANDIDATA"
+            return r
+
+        def hay(x):
+            return bool((x or "").strip())
+
+        es_plazo = "PLAZO" in r.tipo_conducta
+        preguntas = []
+
+        if not hay(regimen):
+            preguntas.append(
+                "¿Cuál es el régimen laboral del servidor (30057, 276, 728, CAS)?"
+            )
+        if not hay(funcion):
+            preguntas.append(
+                "¿Cuál es la función exacta del cargo que se habría incumplido?"
+            )
+        if not hay(fuente_funcion):
+            preguntas.append(
+                "¿En qué norma interna consta esa función (ROF, MOF o contrato)?"
+            )
+        if es_plazo and not hay(norma_plazo):
+            preguntas.append("¿Qué norma establece el plazo y cuál es su duración?")
+        if es_plazo and not hay(fecha_inicio_computo):
+            preguntas.append("¿Desde qué fecha corre el plazo?")
+
+        r.preguntas_para_el_usuario = preguntas
+
+        if preguntas:
+            r.estado_tipificacion = "INFORMACION_INSUFICIENTE"
+        else:
+            r.estado_tipificacion = "PRELIMINAR_COMPLETO_REQUIERE_REVISION"
+        return r
 
     def _extraer_dimensiones_hecho(
         self,
@@ -1419,12 +1567,30 @@ class TypificationEngine:
                 ):
                     negada = True
 
+                if contexto_niega(contexto_previo):
+                    negada = True
+
                 ocurrencias.append({
                     "inicio": inicio_accion,
                     "fin": fin_accion,
                     "etapa": etapa,
                     "negada": negada,
                 })
+
+        claves_por_etapa = {
+            "ELABORACION": ["ELABORACION", "EMISION", "SUSCRIPCION"],
+            "REMISION": ["REMISION", "NOTIFICACION"],
+            "PRESENTACION": ["PRESENTACION"],
+        }
+        for etapa_om, claves_om in claves_por_etapa.items():
+            for clave_om in claves_om:
+                for ini_om, fin_om in omisiones(t, clave_om):
+                    ocurrencias.append({
+                        "inicio": ini_om,
+                        "fin": fin_om,
+                        "etapa": etapa_om,
+                        "negada": True,
+                    })
 
         ocurrencias.sort(key=lambda x: x["inicio"])
 
@@ -1583,7 +1749,7 @@ class TypificationEngine:
 
                 elif etapa == "REMISION" and estado == "FUERA_DE_PLAZO":
                     partes.append(
-                        "INCUMPLIMIENTO DE PLAZO (REMISIÓN)"
+                        "INCUMPLIMIENTO DE PLAZO (PRESENTACIÓN)"
                     )
 
                 elif etapa == "PRESENTACION" and estado == "FUERA_DE_PLAZO":
@@ -1888,6 +2054,21 @@ class TypificationEngine:
         ]):
             agregar("NO VERIFICACIÓN")
 
+        # Revision general de negaciones (pronombres, coordinacion
+        # activa, omitio/dejo de + infinitivo, notificar, etc.)
+        for _clave, _modalidad in [
+            ("ELABORACION", "NO ELABORACIÓN"),
+            ("REMISION", "NO REMISIÓN"),
+            ("PRESENTACION", "NO PRESENTACIÓN"),
+            ("VERIFICACION", "NO VERIFICACIÓN"),
+            ("NOTIFICACION", "NO NOTIFICACIÓN"),
+            ("EMISION", "NO EMISIÓN"),
+            ("SUSCRIPCION", "NO SUSCRIPCIÓN"),
+            ("AUTORIZACION", "NO AUTORIZACIÓN"),
+        ]:
+            if accion_negada(texto, _clave):
+                agregar(_modalidad)
+
         # ============================================================
         # 3. CONDUCTAS POSITIVAS
         # ============================================================
@@ -1917,22 +2098,22 @@ class TypificationEngine:
         ]):
             agregar("PRESENTACIÓN")
 
-        if contiene(r"\bremiti[oó]\b") and not contiene(r"\bno remiti[oó]\b"):
+        if accion_positiva(texto, "REMISION"):
             agregar("REMISIÓN")
 
-        if contiene(r"\belabor[oó]\b") and not contiene(r"\bno elabor[oó]\b"):
+        if accion_positiva(texto, "ELABORACION"):
             agregar("ELABORACIÓN")
 
-        if contiene(r"\bautoriz[oó]\b") and not contiene(r"\bno autoriz[oó]\b"):
+        if accion_positiva(texto, "AUTORIZACION"):
             agregar("AUTORIZACIÓN")
 
-        if contiene(r"\bsuscribi[oó]\b") and not contiene(r"\bno suscribi[oó]\b"):
+        if accion_positiva(texto, "SUSCRIPCION"):
             agregar("SUSCRIPCIÓN")
 
-        if contiene(r"\bemit[ií]\b") and not contiene(r"\bno emit[ií]\b"):
+        if accion_positiva(texto, "EMISION"):
             agregar("EMISIÓN")
 
-        if contiene(r"\bverific[oó]\b") and not contiene(r"\bno verific[oó]\b"):
+        if accion_positiva(texto, "VERIFICACION"):
             agregar("VERIFICACIÓN")
 
         # ============================================================
@@ -2325,5 +2506,6 @@ if __name__ == "__main__":
     print("=== PRUEBA TYPOFICATION ENGINE V3.1 ===")
     print(resultado.to_dict())
     print("=== PRUEBA COMPLETADA ===")
+
 
 

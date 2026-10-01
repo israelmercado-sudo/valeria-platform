@@ -1,0 +1,170 @@
+﻿        def determinar_temporal_modalidad(modalidad):
+            # ========================================================
+            # Determinación temporal específica por modalidad.
+            #
+            # La temporalidad se asocia a la ocurrencia concreta de
+            # la modalidad y no a cualquier expresión temporal del
+            # texto completo.
+            # ========================================================
+
+            texto_local = texto
+
+            # --------------------------------------------------------
+            # 1. Definición de formas lingüísticas de cada modalidad
+            # --------------------------------------------------------
+            patrones_modalidad = {
+                "ELABORACIÓN": [
+                    r"\bfue elaborado\b",
+                    r"\bfue elaborada\b",
+                    r"\bha sido elaborado\b",
+                    r"\bha sido elaborada\b",
+                    r"\belabor[oó]\b",
+                    r"\belaborado\b",
+                    r"\belaborada\b",
+                ],
+                "REMISIÓN": [
+                    r"\bfue remitido\b",
+                    r"\bfue remitida\b",
+                    r"\bha sido remitido\b",
+                    r"\bha sido remitida\b",
+                    r"\bremiti[oó]\b",
+                    r"\bremitido\b",
+                    r"\bremitida\b",
+                ],
+                "NO ELABORACIÓN": [
+                    r"\bno fue elaborado\b",
+                    r"\bno fue elaborada\b",
+                    r"\bno elabor[oó]\b",
+                    r"\bno se elabor[oó]\b",
+                ],
+                "NO REMISIÓN": [
+                    r"\bno fue remitido\b",
+                    r"\bno fue remitida\b",
+                    r"\bno remiti[oó]\b",
+                    r"\bno se remitió\b",
+                ],
+            }
+
+            # --------------------------------------------------------
+            # 2. Buscar las posiciones de la modalidad
+            # --------------------------------------------------------
+            ocurrencias = []
+
+            for patron in patrones_modalidad.get(modalidad, []):
+                for match in re.finditer(
+                    patron,
+                    texto_local,
+                    flags=re.IGNORECASE
+                ):
+                    ocurrencias.append(match)
+
+            if not ocurrencias:
+                return "SIN INFORMACIÓN TEMPORAL"
+
+            # Orden cronológico de las ocurrencias.
+            ocurrencias.sort(key=lambda m: m.start())
+
+            # --------------------------------------------------------
+            # 3. Determinar temporalidad de una ocurrencia concreta
+            # --------------------------------------------------------
+            for match in ocurrencias:
+                inicio = match.start()
+                fin = match.end()
+
+                # Ventana corta posterior a la acción.
+                ventana_posterior = texto_local[fin:fin + 65]
+
+                # Ventana inmediatamente anterior para casos como:
+                # "dentro del plazo, fue remitido..."
+                ventana_anterior = texto_local[max(0, inicio - 45):inicio]
+
+                # ----------------------------------------------------
+                # Incumplimiento
+                # ----------------------------------------------------
+                if re.search(
+                    r"\bfuera del plazo\b|\bdespu[eé]s del plazo\b|"
+                    r"\bposterior al plazo\b|\bextempor[aá]neamente\b|"
+                    r"\btard[ií]amente\b",
+                    ventana_posterior,
+                    flags=re.IGNORECASE
+                ):
+                    return "INCUMPLIMIENTO DE PLAZO"
+
+                if re.search(
+                    r"\bfuera del plazo\b|\bdespu[eé]s del plazo\b|"
+                    r"\bposterior al plazo\b|\bextempor[aá]neamente\b|"
+                    r"\btard[ií]amente\b",
+                    ventana_anterior,
+                    flags=re.IGNORECASE
+                ):
+                    return "INCUMPLIMIENTO DE PLAZO"
+
+                # ----------------------------------------------------
+                # Cumplimiento
+                # ----------------------------------------------------
+                if re.search(
+                    r"\bdentro del plazo\b|\boportunamente\b|"
+                    r"\bde manera oportuna\b",
+                    ventana_posterior,
+                    flags=re.IGNORECASE
+                ):
+                    return "CUMPLIMIENTO DE PLAZO"
+
+                if re.search(
+                    r"\bdentro del plazo\b|\boportunamente\b|"
+                    r"\bde manera oportuna\b",
+                    ventana_anterior,
+                    flags=re.IGNORECASE
+                ):
+                    return "CUMPLIMIENTO DE PLAZO"
+
+            # --------------------------------------------------------
+            # 4. Coordinación con temporalidad compartida
+            #
+            # Ejemplos:
+            # "fue elaborado y remitido dentro del plazo"
+            # "fue remitido y posteriormente elaborado dentro del plazo"
+            # --------------------------------------------------------
+            if modalidad in ("ELABORACIÓN", "REMISIÓN"):
+                if re.search(
+                    r"\bfue elaborado\b.{0,35}"
+                    r"\b(?:y|luego|posteriormente)\b.{0,35}"
+                    r"\bremitid[oa]\b.{0,35}"
+                    r"\bdentro del plazo\b",
+                    texto_local,
+                    flags=re.IGNORECASE
+                ):
+                    return "CUMPLIMIENTO DE PLAZO"
+
+                if re.search(
+                    r"\bfue remitid[oa]\b.{0,35}"
+                    r"\b(?:y|luego|posteriormente)\b.{0,35}"
+                    r"\belaborad[oa]\b.{0,35}"
+                    r"\bdentro del plazo\b",
+                    texto_local,
+                    flags=re.IGNORECASE
+                ):
+                    return "CUMPLIMIENTO DE PLAZO"
+
+            # --------------------------------------------------------
+            # 5. Casos negativos con plazo explícito
+            # --------------------------------------------------------
+            if modalidad == "NO ELABORACIÓN":
+                if re.search(
+                    r"\bno fue elaborad[oa]\b.{0,45}\bdentro del plazo\b|"
+                    r"\bno elabor[oó]\b.{0,45}\bdentro del plazo\b",
+                    texto_local,
+                    flags=re.IGNORECASE
+                ):
+                    return "INCUMPLIMIENTO DE PLAZO"
+
+            if modalidad == "NO REMISIÓN":
+                if re.search(
+                    r"\bno fue remitid[oa]\b.{0,45}\bdentro del plazo\b|"
+                    r"\bno remiti[oó]\b.{0,45}\bdentro del plazo\b",
+                    texto_local,
+                    flags=re.IGNORECASE
+                ):
+                    return "INCUMPLIMIENTO DE PLAZO"
+
+            return "SIN INFORMACIÓN TEMPORAL"

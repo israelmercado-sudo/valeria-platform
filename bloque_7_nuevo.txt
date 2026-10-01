@@ -1,0 +1,117 @@
+﻿        # ============================================================
+        # 7. DETALLE TEMPORAL POR MODALIDAD
+        # ============================================================
+        # Mantiene "componente_temporal" como dato global por
+        # compatibilidad, pero determina la temporalidad específica
+        # de cada modalidad a partir de su propio segmento textual.
+        #
+        # Esto evita que:
+        # "elaborado dentro del plazo y posteriormente remitido
+        # fuera del plazo"
+        #
+        # sea interpretado como si ELABORACIÓN también hubiera sido
+        # realizada fuera del plazo.
+        # ============================================================
+
+        def determinar_temporal_modalidad(modalidad):
+            texto_modalidad = texto
+
+            # --------------------------------------------------------
+            # 7.1 ELABORACIÓN
+            # --------------------------------------------------------
+            if modalidad == "ELABORACIÓN":
+                patrones_incumplimiento = [
+                    r"\b(?:fue|ha sido)\s+elaborad[oa]\b.{0,45}\bfuera del plazo\b",
+                    r"\belabor[oó]\b.{0,45}\bfuera del plazo\b",
+                    r"\b(?:fue|ha sido)\s+elaborad[oa]\b.{0,45}\bdespu[eé]s del plazo\b",
+                    r"\belabor[oó]\b.{0,45}\bdespu[eé]s del plazo\b",
+                ]
+
+                patrones_cumplimiento = [
+                    r"\b(?:fue|ha sido)\s+elaborad[oa]\b.{0,45}\bdentro del plazo\b",
+                    r"\belabor[oó]\b.{0,45}\bdentro del plazo\b",
+                    r"\b(?:fue|ha sido)\s+elaborad[oa]\b.{0,45}\boportunamente\b",
+                    r"\belabor[oó]\b.{0,45}\boportunamente\b",
+                ]
+
+                if any(contiene(p) for p in patrones_incumplimiento):
+                    return "INCUMPLIMIENTO DE PLAZO"
+
+                if any(contiene(p) for p in patrones_cumplimiento):
+                    return "CUMPLIMIENTO DE PLAZO"
+
+                # Caso coordinado:
+                # "fue elaborado dentro del plazo y posteriormente remitido..."
+                # El plazo pertenece directamente a elaboración.
+                if contiene(
+                    r"\b(?:fue|ha sido)\s+elaborad[oa]\b.{0,45}\bdentro del plazo\b"
+                ):
+                    return "CUMPLIMIENTO DE PLAZO"
+
+                return "SIN INFORMACIÓN TEMPORAL"
+
+            # --------------------------------------------------------
+            # 7.2 REMISIÓN
+            # --------------------------------------------------------
+            if modalidad == "REMISIÓN":
+                patrones_incumplimiento = [
+                    r"\b(?:fue|ha sido)\s+remitid[oa]\b.{0,45}\bfuera del plazo\b",
+                    r"\bremiti[oó]\b.{0,45}\bfuera del plazo\b",
+                    r"\bremitid[oa]\b.{0,45}\bfuera del plazo\b",
+                    r"\b(?:fue|ha sido)\s+remitid[oa]\b.{0,45}\bdespu[eé]s del plazo\b",
+                    r"\bremiti[oó]\b.{0,45}\bdespu[eé]s del plazo\b",
+                    r"\bremitid[oa]\b.{0,45}\bdespu[eé]s del plazo\b",
+                ]
+
+                patrones_cumplimiento = [
+                    r"\b(?:fue|ha sido)\s+remitid[oa]\b.{0,45}\bdentro del plazo\b",
+                    r"\bremiti[oó]\b.{0,45}\bdentro del plazo\b",
+                    r"\bremitid[oa]\b.{0,45}\bdentro del plazo\b",
+                    r"\b(?:fue|ha sido)\s+remitid[oa]\b.{0,45}\boportunamente\b",
+                    r"\bremiti[oó]\b.{0,45}\boportunamente\b",
+                    r"\bremitid[oa]\b.{0,45}\boportunamente\b",
+                ]
+
+                if any(contiene(p) for p in patrones_incumplimiento):
+                    return "INCUMPLIMIENTO DE PLAZO"
+
+                if any(contiene(p) for p in patrones_cumplimiento):
+                    return "CUMPLIMIENTO DE PLAZO"
+
+                return "SIN INFORMACIÓN TEMPORAL"
+
+            # --------------------------------------------------------
+            # 7.3 NO ELABORACIÓN
+            # --------------------------------------------------------
+            if modalidad == "NO ELABORACIÓN":
+                if any(contiene(p) for p in [
+                    r"\bno fue elaborad[oa]\b.{0,45}\bdentro del plazo\b",
+                    r"\bno elabor[oó]\b.{0,45}\bdentro del plazo\b"
+                ]):
+                    return "INCUMPLIMIENTO DE PLAZO"
+
+                return "SIN INFORMACIÓN TEMPORAL"
+
+            # --------------------------------------------------------
+            # 7.4 NO REMISIÓN
+            # --------------------------------------------------------
+            if modalidad == "NO REMISIÓN":
+                if any(contiene(p) for p in [
+                    r"\bno fue remitid[oa]\b.{0,45}\bdentro del plazo\b",
+                    r"\bno remiti[oó]\b.{0,45}\bdentro del plazo\b"
+                ]):
+                    return "INCUMPLIMIENTO DE PLAZO"
+
+                return "SIN INFORMACIÓN TEMPORAL"
+
+            return "SIN INFORMACIÓN TEMPORAL"
+
+        resultado["modalidades_detalle"] = []
+
+        for modalidad in resultado["modalidades"]:
+            resultado["modalidades_detalle"].append({
+                "modalidad": modalidad,
+                "componente_temporal": determinar_temporal_modalidad(modalidad)
+            })
+
+        return resultado

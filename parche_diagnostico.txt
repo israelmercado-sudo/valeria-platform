@@ -1,0 +1,326 @@
+    def _generar_matriz_subsuncion(
+        self,
+        conducta: str,
+        deber: str,
+        posible_falta: str,
+        normas: List[str],
+        hechos: List[str],
+        evidencia: List[str],
+        tipo_conducta: str,
+    ) -> List[Dict[str, Any]]:
+        """
+        V3.2.1 - Matriz de subsunción preliminar.
+
+        Mejora respecto de V3.2:
+        - diferencia deber, vigencia, conocimiento/notificación,
+          circunstancias temporales, hecho imputado e intervención;
+        - no equipara notificación con intervención;
+        - no declara hechos como acreditados por la sola existencia
+          de una referencia probatoria;
+        - mantiene la naturaleza preliminar de la matriz;
+        - incorpora elementos transversales de conducta, intervención
+          y subsunción.
+        """
+
+        matriz: List[Dict[str, Any]] = []
+
+        if not hechos:
+            matriz.append({
+                "hecho": "No se han proporcionado hechos concretos.",
+                "categoria_hecho": "INFORMACIÓN FALTANTE",
+                "elemento_tipo": "Identificación concreta de los hechos materia de imputación.",
+                "deber_relacionado": deber or "No identificado.",
+                "evidencia_relacionada": "No proporcionada.",
+                "estado_acreditacion": "PENDIENTE DE ACREDITACIÓN",
+                "justificacion": (
+                    "La ausencia de hechos concretos impide realizar una "
+                    "subsunción preliminar adecuada. Deben identificarse "
+                    "hechos verificables, concretos y relevantes."
+                ),
+            })
+
+        def clasificar_hecho(hecho: str) -> Dict[str, str]:
+            h = hecho.lower().strip()
+
+            # 1. Vigencia y aplicabilidad
+            if any(p in h for p in [
+                "estaba vigente",
+                "vigente",
+                "vigencia",
+                "era aplicable",
+                "aplicable",
+                "se encontraba vigente",
+                "norma vigente",
+            ]):
+                return {
+                    "categoria": "VIGENCIA / APLICABILIDAD",
+                    "elemento": (
+                        "Vigencia y aplicabilidad de la norma "
+                        "o deber al momento de los hechos."
+                    ),
+                }
+
+            # 2. Conocimiento / notificación
+            if any(p in h for p in [
+                "fue notificado",
+                "fue notificada",
+                "se le notificó",
+                "se notificó",
+                "notificado formalmente",
+                "notificación",
+                "comunicado",
+                "comunicación",
+                "tomó conocimiento",
+                "tuvo conocimiento",
+                "conocía",
+            ]):
+                return {
+                    "categoria": "CONOCIMIENTO / NOTIFICACIÓN",
+                    "elemento": (
+                        "Conocimiento o comunicación de la obligación, "
+                        "exigencia o circunstancia relevante."
+                    ),
+                }
+
+            # 3. Circunstancia temporal
+            if any(p in h for p in [
+                "plazo",
+                "venció",
+                "vencimiento",
+                "fecha",
+                "día",
+                "periodo",
+                "período",
+                "dentro del plazo",
+                "fuera del plazo",
+                "antes de",
+                "después de",
+            ]):
+                return {
+                    "categoria": "CIRCUNSTANCIA TEMPORAL",
+                    "elemento": (
+                        "Circunstancias de tiempo, modo y lugar "
+                        "relevantes para la imputación."
+                    ),
+                }
+
+            # 4. Hecho imputado / conducta omisiva o incumplimiento
+            if any(p in h for p in [
+                "no presentó",
+                "no presento",
+                "no fue presentado",
+                "no se presentó",
+                "no fue entregado",
+                "no se entregó",
+                "no fue remitido",
+                "no se remitió",
+                "no fue realizado",
+                "no se realizó",
+                "no fue cumplido",
+                "no se cumplió",
+                "omitió",
+                "omitiò",
+                "no realizó",
+                "no realizo",
+                "no cumplió",
+                "no cumplio",
+                "incumplió",
+                "incumplio",
+                "dejó de",
+                "dejo de",
+                "no efectuó",
+                "no efectuo",
+                "no remitió",
+                "no remitio",
+                "no entregó",
+                "no entrego",
+            ]):
+                return {
+                    "categoria": "HECHO IMPUTADO",
+                    "elemento": (
+                        "Existencia del hecho materia de imputación."
+                    ),
+                }
+
+            # 5. Deber / obligación
+            if any(p in h for p in [
+                "obligación",
+                "obligacion",
+                "deber",
+                "función",
+                "funcion",
+                "prohibición",
+                "prohibicion",
+                "responsabilidad funcional",
+                "correspondía",
+                "correspondia",
+                "tenía la obligación",
+                "tenia la obligacion",
+            ]):
+                return {
+                    "categoria": "DEBER / OBLIGACIÓN",
+                    "elemento": (
+                        "Identificación concreta del deber funcional "
+                        "presuntamente incumplido."
+                    ),
+                }
+
+            # 6. Intervención: solamente ante expresiones que indiquen
+            # participación o ejecución directa.
+            if any(p in h for p in [
+                "participó",
+                "participo",
+                "intervino",
+                "intervino directamente",
+                "ejecutó",
+                "ejecuto",
+                "realizó personalmente",
+                "realizo personalmente",
+                "suscribió",
+                "suscribio",
+                "emitió",
+                "emitio",
+                "elaboró",
+                "elaboro",
+                "aprobó",
+                "aprobo",
+                "dispuso",
+                "autorizó",
+                "autorizo",
+            ]):
+                return {
+                    "categoria": "INTERVENCIÓN",
+                    "elemento": (
+                        "Intervención o participación del servidor "
+                        "investigado en el hecho atribuido."
+                    ),
+                }
+
+            # 7. Hecho relevante no categorizado específicamente
+            return {
+                "categoria": "HECHO RELEVANTE",
+                "elemento": (
+                    "Existencia y relevancia del hecho para el análisis "
+                    "de la imputación."
+                ),
+            }
+
+        # Construcción de la matriz por cada hecho proporcionado.
+        for indice, hecho in enumerate(hechos):
+
+            clasificacion = clasificar_hecho(hecho)
+
+            evidencia_relacionada = ""
+
+            if evidencia:
+                if indice < len(evidencia):
+                    evidencia_relacionada = evidencia[indice]
+                elif len(evidencia) == 1:
+                    evidencia_relacionada = evidencia[0]
+
+            if evidencia_relacionada:
+                estado = "REFERENCIA PROBATORIA PROPORCIONADA"
+                justificacion = (
+                    "Se ha proporcionado una referencia probatoria relacionada "
+                    "con el hecho. Esta referencia no permite, por sí sola, "
+                    "considerar el hecho acreditado; corresponde verificar "
+                    "su contenido, autenticidad, pertinencia y suficiencia."
+                )
+            else:
+                estado = "SIN EVIDENCIA IDENTIFICADA"
+                justificacion = (
+                    "No se ha identificado una referencia probatoria específica "
+                    "para este hecho dentro de la información proporcionada."
+                )
+
+            if clasificacion["categoria"] == "CONOCIMIENTO / NOTIFICACIÓN":
+                justificacion += (
+                    " La notificación o comunicación puede sustentar el "
+                    "conocimiento de una obligación o circunstancia, pero no "
+                    "demuestra por sí misma la intervención material del servidor."
+                )
+
+            matriz.append({
+                "hecho": hecho,
+                "categoria_hecho": clasificacion["categoria"],
+                "elemento_tipo": clasificacion["elemento"],
+                "deber_relacionado": deber or "No identificado.",
+                "evidencia_relacionada": (
+                    evidencia_relacionada
+                    if evidencia_relacionada
+                    else "No identificada."
+                ),
+                "estado_acreditacion": estado,
+                "justificacion": justificacion,
+            })
+
+        # Elemento transversal 1: conducta atribuida.
+        matriz.append({
+            "hecho": conducta or "No se ha identificado conducta concreta.",
+            "categoria_hecho": "CONDUCTA ATRIBUIDA",
+            "elemento_tipo": (
+                "Identificación concreta de la conducta atribuida "
+                "al servidor investigado."
+            ),
+            "deber_relacionado": deber or "No identificado.",
+            "evidencia_relacionada": (
+                "Debe verificarse con los medios probatorios pertinentes."
+            ),
+            "estado_acreditacion": "PENDIENTE DE ACREDITACIÓN",
+            "justificacion": (
+                "La conducta constituye una hipótesis de imputación "
+                "y requiere ser contrastada con los hechos y medios "
+                "probatorios incorporados al expediente."
+            ),
+        })
+
+        # Elemento transversal 2: intervención.
+        matriz.append({
+            "hecho": conducta or "Conducta atribuida no especificada.",
+            "categoria_hecho": "INTERVENCIÓN",
+            "elemento_tipo": (
+                "Intervención o participación del servidor investigado "
+                "en el hecho atribuido."
+            ),
+            "deber_relacionado": deber or "No identificado.",
+            "evidencia_relacionada": (
+                "Debe identificarse el medio probatorio que permita "
+                "establecer la intervención del servidor."
+            ),
+            "estado_acreditacion": "PENDIENTE DE ACREDITACIÓN",
+            "justificacion": (
+                "La atribución de responsabilidad requiere establecer "
+                "la relación del servidor con el hecho investigado. "
+                "La sola notificación o conocimiento de una obligación "
+                "no equivale automáticamente a intervención."
+            ),
+        })
+
+        # Elemento transversal 3: subsunción.
+        matriz.append({
+            "hecho": (
+                posible_falta
+                if posible_falta
+                else "Posible falta disciplinaria no especificada."
+            ),
+            "categoria_hecho": "SUBSUNCIÓN",
+            "elemento_tipo": (
+                "Correspondencia entre los hechos acreditados y los "
+                "elementos de la falta disciplinaria imputada."
+            ),
+            "deber_relacionado": deber or "No identificado.",
+            "evidencia_relacionada": (
+                "Debe verificarse la totalidad de los elementos "
+                "relevantes antes de concluir la subsunción."
+            ),
+            "estado_acreditacion": "PENDIENTE DE SUBSUNCIÓN",
+            "justificacion": (
+                "La posible falta constituye una hipótesis preliminar. "
+                "La subsunción definitiva requiere identificar la norma "
+                "tipificadora aplicable y contrastar sus elementos con "
+                "los hechos efectivamente acreditados."
+            ),
+        })
+
+        return matriz
+

@@ -2,6 +2,7 @@
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import router
+from app.api.tipificar import router_tipificar
 
 app = FastAPI(
     title="Valeria Platform",
@@ -30,3 +31,4 @@ def inicio():
     }
 
 app.include_router(router)
+app.include_router(router_tipificar)

@@ -1,0 +1,6 @@
+{
+  "verificado": false,
+  "nota": "Feriados nacionales fijos. Completar dias no laborables del Ejecutivo y feriados moviles (Semana Santa) desde El Peruano.",
+  "fijos": ["01-01", "01-05", "29-06", "23-07", "28-07", "29-07", "06-08", "30-08", "08-10", "01-11", "08-12", "09-12", "25-12"],
+  "extra": []
+}

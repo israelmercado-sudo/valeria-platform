@@ -1,0 +1,175 @@
+﻿        def determinar_temporal_modalidad(modalidad):
+            # ========================================================
+            # 7. DETALLE TEMPORAL POR MODALIDAD
+            #
+            # La temporalidad se determina por ocurrencia concreta
+            # de la acción. Primero se resuelven coordinaciones con
+            # temporalidad compartida y luego se analiza cada acción
+            # hasta la siguiente acción detectada.
+            # ========================================================
+
+            texto_local = texto
+
+            patrones_accion = {
+                "ELABORACIÓN": [
+                    r"\bfue elaborado\b",
+                    r"\bfue elaborada\b",
+                    r"\bha sido elaborado\b",
+                    r"\bha sido elaborada\b",
+                    r"\belabor[oó]\b",
+                    r"\belaborado\b",
+                    r"\belaborada\b",
+                ],
+                "REMISIÓN": [
+                    r"\bfue remitido\b",
+                    r"\bfue remitida\b",
+                    r"\bha sido remitido\b",
+                    r"\bha sido remitida\b",
+                    r"\bremiti[oó]\b",
+                    r"\bremitido\b",
+                    r"\bremitida\b",
+                ],
+            }
+
+            # --------------------------------------------------------
+            # 1. Coordinaciones con temporalidad compartida
+            # --------------------------------------------------------
+            if modalidad in ("ELABORACIÓN", "REMISIÓN"):
+
+                coordinaciones_cumplimiento = [
+                    r"\bfue elaborado\b.{0,35}\b(?:y|luego|posteriormente)\b.{0,35}\bremitid[oa]\b.{0,35}\bdentro del plazo\b",
+                    r"\bfue remitid[oa]\b.{0,35}\b(?:y|luego|posteriormente)\b.{0,35}\belaborad[oa]\b.{0,35}\bdentro del plazo\b",
+                    r"\belabor[oó]\b.{0,35}\b(?:y|luego|posteriormente)\b.{0,35}\bremiti[oó]\b.{0,35}\bdentro del plazo\b",
+                    r"\bremiti[oó]\b.{0,35}\b(?:y|luego|posteriormente)\b.{0,35}\belabor[oó]\b.{0,35}\bdentro del plazo\b",
+                ]
+
+                coordinaciones_incumplimiento = [
+                    r"\bfue elaborado\b.{0,35}\b(?:y|luego|posteriormente)\b.{0,35}\bremitid[oa]\b.{0,35}\bfuera del plazo\b",
+                    r"\bfue remitid[oa]\b.{0,35}\b(?:y|luego|posteriormente)\b.{0,35}\belaborad[oa]\b.{0,35}\bfuera del plazo\b",
+                    r"\belabor[oó]\b.{0,35}\b(?:y|luego|posteriormente)\b.{0,35}\bremiti[oó]\b.{0,35}\bfuera del plazo\b",
+                    r"\bremiti[oó]\b.{0,35}\b(?:y|luego|posteriormente)\b.{0,35}\belabor[oó]\b.{0,35}\bfuera del plazo\b",
+                ]
+
+                if any(
+                    re.search(p, texto_local, flags=re.IGNORECASE)
+                    for p in coordinaciones_cumplimiento
+                ):
+                    return "CUMPLIMIENTO DE PLAZO"
+
+                if any(
+                    re.search(p, texto_local, flags=re.IGNORECASE)
+                    for p in coordinaciones_incumplimiento
+                ):
+                    return "INCUMPLIMIENTO DE PLAZO"
+
+            # --------------------------------------------------------
+            # 2. Casos negativos con plazo explícito
+            # --------------------------------------------------------
+            if modalidad == "NO ELABORACIÓN":
+                if re.search(
+                    r"\bno fue elaborad[oa]\b.{0,45}\bdentro del plazo\b|"
+                    r"\bno elabor[oó]\b.{0,45}\bdentro del plazo\b",
+                    texto_local,
+                    flags=re.IGNORECASE
+                ):
+                    return "INCUMPLIMIENTO DE PLAZO"
+
+                return "SIN INFORMACIÓN TEMPORAL"
+
+            if modalidad == "NO REMISIÓN":
+                if re.search(
+                    r"\bno fue remitid[oa]\b.{0,45}\bdentro del plazo\b|"
+                    r"\bno remiti[oó]\b.{0,45}\bdentro del plazo\b",
+                    texto_local,
+                    flags=re.IGNORECASE
+                ):
+                    return "INCUMPLIMIENTO DE PLAZO"
+
+                return "SIN INFORMACIÓN TEMPORAL"
+
+            # --------------------------------------------------------
+            # 3. Buscar todas las acciones y sus posiciones
+            # --------------------------------------------------------
+            ocurrencias = []
+
+            for tipo, patrones in patrones_accion.items():
+                for patron in patrones:
+                    for match in re.finditer(
+                        patron,
+                        texto_local,
+                        flags=re.IGNORECASE
+                    ):
+                        ocurrencias.append({
+                            "tipo": tipo,
+                            "inicio": match.start(),
+                            "fin": match.end(),
+                        })
+
+            if not ocurrencias:
+                return "SIN INFORMACIÓN TEMPORAL"
+
+            # Eliminar coincidencias duplicadas.
+            unicas = {}
+            for ocurrencia in ocurrencias:
+                clave = (
+                    ocurrencia["tipo"],
+                    ocurrencia["inicio"],
+                    ocurrencia["fin"],
+                )
+                unicas[clave] = ocurrencia
+
+            ocurrencias = list(unicas.values())
+            ocurrencias.sort(key=lambda x: x["inicio"])
+
+            # --------------------------------------------------------
+            # 4. Analizar únicamente el segmento de esta acción
+            # --------------------------------------------------------
+            ocurrencias_modalidad = [
+                o for o in ocurrencias
+                if o["tipo"] == modalidad
+            ]
+
+            for ocurrencia in ocurrencias_modalidad:
+                inicio = ocurrencia["inicio"]
+                fin = ocurrencia["fin"]
+
+                siguientes = [
+                    o["inicio"]
+                    for o in ocurrencias
+                    if o["inicio"] > inicio
+                ]
+
+                limite = min(siguientes) if siguientes else len(texto_local)
+
+                segmento = texto_local[fin:limite]
+
+                # No permitimos que una cláusula siguiente contamine
+                # la acción actual.
+                segmento = re.split(
+                    r"\b(?:pero|sin embargo|aunque)\b",
+                    segmento,
+                    maxsplit=1,
+                    flags=re.IGNORECASE
+                )[0]
+
+                if re.search(
+                    r"\bfuera del plazo\b|"
+                    r"\bdespu[eé]s del plazo\b|"
+                    r"\bposterior al plazo\b|"
+                    r"\bextempor[aá]neamente\b|"
+                    r"\btard[ií]amente\b",
+                    segmento,
+                    flags=re.IGNORECASE
+                ):
+                    return "INCUMPLIMIENTO DE PLAZO"
+
+                if re.search(
+                    r"\bdentro del plazo\b|"
+                    r"\boportunamente\b|"
+                    r"\bde manera oportuna\b",
+                    segmento,
+                    flags=re.IGNORECASE
+                ):
+                    return "CUMPLIMIENTO DE PLAZO"
+
+            return "SIN INFORMACIÓN TEMPORAL"

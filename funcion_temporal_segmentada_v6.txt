@@ -1,0 +1,92 @@
+﻿            # =========================================================
+            # 7. FALLBACK DE COORDINACIÓN
+            #
+            # La temporalidad de la segunda acción solo se comparte
+            # con la primera cuando la construcción funciona como una
+            # coordinación temporalmente compartida.
+            #
+            # Si la expresión temporal está claramente asociada a la
+            # segunda acción, no se propaga hacia la primera.
+            # =========================================================
+
+            if len(ocurrencias) >= 2:
+
+                for indice in range(len(ocurrencias) - 1):
+
+                    primera = ocurrencias[indice]
+                    segunda = ocurrencias[indice + 1]
+
+                    if primera["tipo"] == segunda["tipo"]:
+                        continue
+
+                    texto_entre = texto_local[
+                        primera["fin"]:segunda["inicio"]
+                    ]
+
+                    if not re.search(
+                        r"\b(?:y|luego|posteriormente)\b",
+                        texto_entre,
+                        flags=re.IGNORECASE,
+                    ):
+                        continue
+
+                    segmento_segunda = texto_local[
+                        segunda["fin"]:
+                    ]
+
+                    estado_segunda = clasificar_segmento(
+                        segmento_segunda
+                    )
+
+                    if estado_segunda is None:
+                        continue
+
+                    # -------------------------------------------------
+                    # Si la modalidad evaluada es la segunda acción,
+                    # puede recibir directamente su temporalidad.
+                    # -------------------------------------------------
+                    if segunda["tipo"] == modalidad:
+                        return estado_segunda
+
+                    # -------------------------------------------------
+                    # La primera acción solo hereda la temporalidad
+                    # cuando la coordinación es claramente compartida.
+                    #
+                    # "elaborado y luego remitido dentro del plazo"
+                    # sí permite compartir el estado.
+                    #
+                    # "elaborado y posteriormente remitido fuera del
+                    # plazo" NO debe retrotraer automáticamente la
+                    # temporalidad a elaboración.
+                    # -------------------------------------------------
+                    if primera["tipo"] == modalidad:
+
+                        temporal_despues_segunda = texto_local[
+                            segunda["fin"]:
+                        ]
+
+                        if re.search(
+                            r"\b(?:fuera del plazo|"
+                            r"despu[eé]s del plazo|"
+                            r"posterior al plazo|"
+                            r"extempor[aá]neamente|"
+                            r"tard[ií]amente)\b",
+                            temporal_despues_segunda,
+                            flags=re.IGNORECASE,
+                        ):
+                            return "SIN INFORMACIÓN TEMPORAL"
+
+                        if re.search(
+                            r"\b(?:dentro del plazo|"
+                            r"oportunamente|"
+                            r"de manera oportuna)\b",
+                            temporal_despues_segunda,
+                            flags=re.IGNORECASE,
+                        ):
+                            return estado_segunda
+
+            # =========================================================
+            # 8. SIN INFORMACIÓN TEMPORAL
+            # =========================================================
+
+            return "SIN INFORMACIÓN TEMPORAL"
