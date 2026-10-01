@@ -1660,20 +1660,35 @@ class TypificationEngine:
                 maxsplit=1
             )[0]
 
-            if o["negada"]:
-                estado = "NO_EJECUTADO"
+             # --- 1. Estado de ejecución (independiente de la temporalidad) ---
+            ejecutado = not o["negada"]
 
-            elif (
+            # --- 2. Componente temporal (se detecta SIEMPRE) ---
+            if (
                 "fuera del plazo" in contexto
                 or "fuera de plazo" in contexto
+                or "fuera de término" in contexto
+                or "fuera de termino" in contexto
             ):
-                estado = "FUERA_DE_PLAZO"
-
-            elif "dentro del plazo" in contexto:
-                estado = "DENTRO_DE_PLAZO"
-
+                estado_temporal = "FUERA_DE_PLAZO"
+            elif (
+                "dentro del plazo" in contexto
+                or "dentro de plazo" in contexto
+                or "dentro del término" in contexto
+                or "dentro del termino" in contexto
+            ):
+                estado_temporal = "DENTRO_DE_PLAZO"
             else:
-                estado = "SIN_INFORMACION_TEMPORAL"
+                estado_temporal = "SIN_INFORMACION_TEMPORAL"
+
+            # --- 3. Combinar ejecución + temporalidad ---
+            if not ejecutado:
+                if estado_temporal != "SIN_INFORMACION_TEMPORAL":
+                    estado = f"NO_EJECUTADO_{estado_temporal}"
+                else:
+                    estado = "NO_EJECUTADO"
+            else:
+                estado = estado_temporal
 
             eventos.append((o["etapa"], estado))
 
@@ -1740,6 +1755,7 @@ class TypificationEngine:
             (etapa, estado)
             for etapa, estado in eventos
             if estado in ("FUERA_DE_PLAZO", "NO_EJECUTADO")
+            or estado.startswith("NO_EJECUTADO_")
         ]
 
         nombres = {
@@ -1760,13 +1776,20 @@ class TypificationEngine:
                     partes.append(f"INCUMPLIMIENTO DE PLAZO ({nombre})")
                 elif estado == "NO_EJECUTADO":
                     partes.append(f"OMISIÓN - NO {nombre}")
+                elif estado == "NO_EJECUTADO_DENTRO_DE_PLAZO":
+                    partes.append(f"OMISIÓN - NO {nombre}")
+                elif estado == "NO_EJECUTADO_FUERA_DE_PLAZO":
+                    partes.append(f"OMISIÓN - NO {nombre}")
 
             if partes:
                 return " + ".join(dict.fromkeys(partes))
 
-        if eventos:
+        if eventos and all(
+            not e.startswith("NO_EJECUTADO")
+            and e != "FUERA_DE_PLAZO"
+            for _, e in eventos
+        ):
             return "CUMPLIMIENTO"
-
         indicadores_cumplimiento = [
             "cumplio",
             "cumplio oportunamente",
@@ -1775,7 +1798,6 @@ class TypificationEngine:
             "remitio dentro del plazo",
             "elaboro dentro del plazo",
         ]
-
         if any(
             indicador in texto_plano
             for indicador in indicadores_cumplimiento
@@ -1861,6 +1883,8 @@ class TypificationEngine:
             "DENTRO_DE_PLAZO": "CUMPLIMIENTO DE PLAZO",
             "FUERA_DE_PLAZO": "INCUMPLIMIENTO DE PLAZO",
             "NO_EJECUTADO": "SIN INFORMACIÓN TEMPORAL",
+            "NO_EJECUTADO_DENTRO_DE_PLAZO": "INCUMPLIMIENTO DE PLAZO",
+            "NO_EJECUTADO_FUERA_DE_PLAZO": "INCUMPLIMIENTO DE PLAZO",
             "SIN_INFORMACION_TEMPORAL": "SIN INFORMACIÓN TEMPORAL",
         }
 
@@ -1869,7 +1893,7 @@ class TypificationEngine:
 
         for etapa, estado in eventos:
 
-            if estado == "NO_EJECUTADO":
+            if estado == "NO_EJECUTADO" or estado.startswith("NO_EJECUTADO_"):
                 modalidad = mapa_modalidad_negativa.get(etapa)
             else:
                 modalidad = mapa_modalidad.get(etapa)
@@ -1908,10 +1932,23 @@ class TypificationEngine:
 
         estados = [estado for _, estado in eventos]
 
-        if "FUERA_DE_PLAZO" in estados:
+        # 1. Incumplimiento explícito de plazo:
+        #    - se hizo fuera del plazo (positivo tardío), o
+        #    - no se hizo, con plazo explícito mencionado
+        #      ("no se hizo dentro del plazo" = incumplimiento).
+        if any(
+            e == "FUERA_DE_PLAZO"
+            or e in ("NO_EJECUTADO_DENTRO_DE_PLAZO",
+                     "NO_EJECUTADO_FUERA_DE_PLAZO")
+            for e in estados
+        ):
             componente_temporal = "INCUMPLIMIENTO DE PLAZO"
-        elif "DENTRO_DE_PLAZO" in estados:
+
+        # 2. Cumplimiento explícito dentro del plazo (solo positivo).
+        elif any(e == "DENTRO_DE_PLAZO" for e in estados):
             componente_temporal = "CUMPLIMIENTO DE PLAZO"
+
+        # 3. Sin referencia temporal explícita.
         else:
             componente_temporal = "SIN INFORMACIÓN TEMPORAL"
 
