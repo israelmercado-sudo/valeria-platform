@@ -6,3 +6,5 @@ __pycache__/
 app/core/_archive/
 app/core/typification_engine_backup_*.py
 _backup_core_*/
+__pycache__/
+*.pyc

@@ -1729,48 +1729,24 @@ class TypificationEngine:
             if estado in ("FUERA_DE_PLAZO", "NO_EJECUTADO")
         ]
 
+        nombres = {
+            "ELABORACION": "ELABORACIÓN",
+            "REMISION": "REMISIÓN",
+            "PRESENTACION": "REMISIÓN",
+        }
+
         if etapas_incumplidas:
             partes = []
-            vistos = set()
 
             for etapa, estado in etapas_incumplidas:
-
-                clave = (etapa, estado)
-
-                if clave in vistos:
+                nombre = nombres.get(etapa)
+                if nombre is None:
                     continue
 
-                vistos.add(clave)
-
-                if etapa == "ELABORACION" and estado == "FUERA_DE_PLAZO":
-                    partes.append(
-                        "INCUMPLIMIENTO DE PLAZO (ELABORACIÓN)"
-                    )
-
-                elif etapa == "REMISION" and estado == "FUERA_DE_PLAZO":
-                    partes.append(
-                        "INCUMPLIMIENTO DE PLAZO (PRESENTACIÓN)"
-                    )
-
-                elif etapa == "PRESENTACION" and estado == "FUERA_DE_PLAZO":
-                    partes.append(
-                        "INCUMPLIMIENTO DE PLAZO (REMISIÓN)"
-                    )
-
-                elif etapa == "REMISION" and estado == "NO_EJECUTADO":
-                    partes.append(
-                        "OMISIÓN - NO REMISIÓN"
-                    )
-
-                elif etapa == "PRESENTACION" and estado == "NO_EJECUTADO":
-                    partes.append(
-                        "OMISIÓN - NO PRESENTACIÓN"
-                    )
-
-                elif etapa == "ELABORACION" and estado == "NO_EJECUTADO":
-                    partes.append(
-                        "OMISIÓN - NO ELABORACIÓN"
-                    )
+                if estado == "FUERA_DE_PLAZO":
+                    partes.append(f"INCUMPLIMIENTO DE PLAZO ({nombre})")
+                elif estado == "NO_EJECUTADO":
+                    partes.append(f"OMISIÓN - NO {nombre}")
 
             if partes:
                 return " + ".join(dict.fromkeys(partes))
@@ -1859,13 +1835,13 @@ class TypificationEngine:
         mapa_modalidad = {
             "ELABORACION": "ELABORACIÓN",
             "REMISION": "REMISIÓN",
-            "PRESENTACION": "PRESENTACIÓN",
+            "PRESENTACION": "REMISIÓN",
         }
 
         mapa_modalidad_negativa = {
             "ELABORACION": "NO ELABORACIÓN",
             "REMISION": "NO REMISIÓN",
-            "PRESENTACION": "NO PRESENTACIÓN",
+            "PRESENTACION": "NO REMISIÓN",
         }
 
         mapa_estado = {
