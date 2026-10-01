@@ -1790,6 +1790,33 @@ class TypificationEngine:
             for _, e in eventos
         ):
             return "CUMPLIMIENTO"
+
+        # Negaciones e incumplimientos explícitos: tienen prioridad
+        # sobre cualquier indicador positivo de cumplimiento.
+        indicadores_omision_generica = [
+            "no cumplio",
+            "no cumplió",
+            "incumplio",
+            "incumplió",
+            "no realizo",
+            "no realizó",
+            "no efectuo",
+            "no efectuó",
+            "no atendio",
+            "no atendió",
+            "no verifico",
+            "no verificó",
+            "no aprobo",
+            "no aprobó",
+            "dejo de",
+            "dejó de",
+            "omitio",
+            "omitió",
+        ]
+
+        if any(ind in texto_plano for ind in indicadores_omision_generica):
+            return "OMISIÓN"
+
         indicadores_cumplimiento = [
             "cumplio",
             "cumplio oportunamente",
