@@ -1484,24 +1484,6 @@ class TypificationEngine:
                 r"se emitio|se emitió|"
                 r"suscrito|suscrita|suscribio|suscribió|"
                 r"se suscribio|se suscribió)\b",
-                [
-                    r"no fue elaborado",
-                    r"no fue elaborada",
-                    r"no se elaboro",
-                    r"no se elaboró",
-                    r"no elaboro",
-                    r"no elaboró",
-                    r"no fue emitido",
-                    r"no fue emitida",
-                    r"no se emitio",
-                    r"no se emitió",
-                    r"no emitio",
-                    r"no emitió",
-                    r"no fue suscrito",
-                    r"no fue suscrita",
-                    r"no se suscribio",
-                    r"no se suscribió",
-                ],
             ),
             (
                 "REMISION",
@@ -1509,39 +1491,17 @@ class TypificationEngine:
                 r"se remitio|se remitió|"
                 r"notificado|notificada|notifico|notificó|"
                 r"se notifico|se notificó)\b",
-                [
-                    r"no fue remitido",
-                    r"no fue remitida",
-                    r"no se remitio",
-                    r"no se remitió",
-                    r"no remitio",
-                    r"no remitió",
-                    r"no fue notificado",
-                    r"no fue notificada",
-                    r"no se notifico",
-                    r"no se notificó",
-                    r"no notifico",
-                    r"no notificó",
-                ],
             ),
             (
                 "PRESENTACION",
                 r"\b(?:presentado|presentada|presento|presentó|"
                 r"se presento|se presentó)\b",
-                [
-                    r"no fue presentado",
-                    r"no fue presentada",
-                    r"no se presento",
-                    r"no se presentó",
-                    r"no presento",
-                    r"no presentó",
-                ],
             ),
         ]
 
         ocurrencias = []
 
-        for etapa, patron, negativos in patrones:
+        for etapa, patron in patrones:
             for m in re.finditer(patron, t):
                 inicio_accion = m.start()
                 fin_accion = m.end()
