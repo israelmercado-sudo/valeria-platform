@@ -14,9 +14,9 @@ CASOS = [
     ("El informe fue presentado dentro del plazo establecido.",
      "CUMPLIMIENTO"),
     ("El informe fue presentado fuera del plazo establecido.",
-     "INCUMPLIMIENTO DE PLAZO (REMISIÓN)"),
-    ("El informe fue elaborado dentro del plazo establecido y posteriormente remitido fuera del plazo.",
      "INCUMPLIMIENTO DE PLAZO (PRESENTACIÓN)"),
+    ("El informe fue elaborado dentro del plazo establecido y posteriormente remitido fuera del plazo.",
+     "INCUMPLIMIENTO DE PLAZO (REMISIÓN)"),
     ("El informe fue elaborado dentro del plazo establecido, pero no fue remitido.",
      "OMISIÓN - NO REMISIÓN"),
     ("El informe fue elaborado fuera del plazo y posteriormente remitido.",
@@ -64,7 +64,7 @@ CASOS = [
 
     # --- Verbos alternativos ---
     ("El documento fue presentado fuera del plazo.",
-     "INCUMPLIMIENTO DE PLAZO (REMISIÓN)"),
+     "INCUMPLIMIENTO DE PLAZO (PRESENTACIÓN)"),
 ]
 
 
