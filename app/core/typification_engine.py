@@ -1737,11 +1737,7 @@ class TypificationEngine:
 
                 if estado == "FUERA_DE_PLAZO":
                     partes.append(f"INCUMPLIMIENTO DE PLAZO ({nombre})")
-                elif estado == "NO_EJECUTADO":
-                    partes.append(f"OMISIÓN - NO {nombre}")
-                elif estado == "NO_EJECUTADO_DENTRO_DE_PLAZO":
-                    partes.append(f"OMISIÓN - NO {nombre}")
-                elif estado == "NO_EJECUTADO_FUERA_DE_PLAZO":
+                elif estado.startswith("NO_EJECUTADO"):
                     partes.append(f"OMISIÓN - NO {nombre}")
 
             if partes:
