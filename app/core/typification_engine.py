@@ -1760,8 +1760,11 @@ class TypificationEngine:
 
         nombres = {
             "ELABORACION": "ELABORACIÓN",
+            "EMISION": "EMISIÓN",
+            "SUSCRIPCION": "SUSCRIPCIÓN",
+            "PRESENTACION": "PRESENTACIÓN",
             "REMISION": "REMISIÓN",
-            "PRESENTACION": "REMISIÓN",
+            "NOTIFICACION": "NOTIFICACIÓN",
         }
 
         if etapas_incumplidas:
@@ -1896,14 +1899,20 @@ class TypificationEngine:
 
         mapa_modalidad = {
             "ELABORACION": "ELABORACIÓN",
+            "EMISION": "EMISIÓN",
+            "SUSCRIPCION": "SUSCRIPCIÓN",
+            "PRESENTACION": "PRESENTACIÓN",
             "REMISION": "REMISIÓN",
-            "PRESENTACION": "REMISIÓN",
+            "NOTIFICACION": "NOTIFICACIÓN",
         }
 
         mapa_modalidad_negativa = {
             "ELABORACION": "NO ELABORACIÓN",
+            "EMISION": "NO EMISIÓN",
+            "SUSCRIPCION": "NO SUSCRIPCIÓN",
+            "PRESENTACION": "NO PRESENTACIÓN",
             "REMISION": "NO REMISIÓN",
-            "PRESENTACION": "NO REMISIÓN",
+            "NOTIFICACION": "NO NOTIFICACIÓN",
         }
 
         mapa_estado = {
@@ -1917,6 +1926,7 @@ class TypificationEngine:
 
         modalidades = []
         detalles = []
+        _INCUMPLE = "INCUMPLIMIENTO DE PLAZO"
 
         for etapa, estado in eventos:
 
@@ -1931,19 +1941,24 @@ class TypificationEngine:
             if modalidad not in modalidades:
                 modalidades.append(modalidad)
 
-            detalle = {
-                "modalidad": modalidad,
-                "componente_temporal": mapa_estado.get(
-                    estado,
-                    "SIN INFORMACIÓN TEMPORAL",
-                ),
-            }
+            componente = mapa_estado.get(
+                estado,
+                "SIN INFORMACIÓN TEMPORAL",
+            )
 
-            if not any(
-                d["modalidad"] == modalidad
-                for d in detalles
-            ):
-                detalles.append(detalle)
+            existente = next(
+                (d for d in detalles if d["modalidad"] == modalidad),
+                None,
+            )
+            if existente is None:
+                detalles.append({
+                    "modalidad": modalidad,
+                    "componente_temporal": componente,
+                })
+            elif componente == _INCUMPLE:
+                # si la misma modalidad aparece dos veces,
+                # el incumplimiento prevalece
+                existente["componente_temporal"] = _INCUMPLE
 
         # =========================================================
         # TEMPORALIDAD GLOBAL
