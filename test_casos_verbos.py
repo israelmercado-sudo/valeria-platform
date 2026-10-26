@@ -27,13 +27,13 @@ CASOS = [
     ("El informe no fue emitido.",
      "OMISIÓN - NO ELABORACIÓN", "emitir = elaborar"),
  
-    # --- "notificar" (equivalente a remitir/comunicar) ---
+    # --- "notificar" (etapa independiente) ---
     ("La resolución fue notificada dentro del plazo establecido.",
-     "CUMPLIMIENTO", "notificar = remitir"),
+     "CUMPLIMIENTO", "notificar = notificaci?n"),
     ("La resolución fue notificada fuera del plazo establecido.",
-     "INCUMPLIMIENTO DE PLAZO (REMISIÓN)", "notificar = remitir"),
+     "INCUMPLIMIENTO DE PLAZO (NOTIFICACIÓN)", "notificar = notificación"),
     ("La resolución no fue notificada.",
-     "OMISIÓN - NO REMISIÓN", "notificar = remitir"),
+     "OMISIÓN - NO NOTIFICACIÓN", "notificar = notificación"),
  
     # --- "suscribir" (equivalente a elaborar/firmar) ---
     ("El documento fue suscrito fuera del plazo.",
@@ -53,7 +53,7 @@ CASOS = [
     ("El informe se emitió fuera del plazo.",
      "INCUMPLIMIENTO DE PLAZO (ELABORACIÓN)", "reflexivo: emitir"),
     ("La resolución no se notificó.",
-     "OMISIÓN - NO REMISIÓN", "reflexivo: notificar"),
+     "OMISIÓN - NO NOTIFICACIÓN", "reflexivo: notificar"),
 ]
  
  
