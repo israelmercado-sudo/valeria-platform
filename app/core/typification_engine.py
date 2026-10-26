@@ -1,4 +1,8 @@
-from app.core.negaciones import contexto_niega, omisiones, accion_positiva, accion_negada
+﻿from app.core.negaciones import (contexto_niega, omisiones, accion_positiva,
+    accion_negada, VERBOS, ETAPA_DE, patron_positivo, sin_acentos)
+
+_SUSTANTIVOS = {k.lower() for k in VERBOS}
+VERBOS_SUSTANTIVO = {}
 import re
 from dataclasses import dataclass, asdict, field
 from typing import List, Dict, Any
@@ -1468,38 +1472,43 @@ class TypificationEngine:
         """
         import re
 
-        t = (conducta or "").lower().strip()
+        t = sin_acentos(conducta or "").strip()
 
         if not t:
             return []
 
         eventos = []
+        _pos = []
 
-        patrones = [
-            (
-                "ELABORACION",
-                r"\b(?:elaborado|elaborada|elaboro|elaboró|"
-                r"se elaboro|se elaboró|"
-                r"emitido|emitida|emitio|emitió|"
-                r"se emitio|se emitió|"
-                r"suscrito|suscrita|suscribio|suscribió|"
-                r"se suscribio|se suscribió)\b",
-            ),
-            (
-                "REMISION",
-                r"\b(?:remitido|remitida|remitio|remitió|"
-                r"se remitio|se remitió|"
-                r"notificado|notificada|notifico|notificó|"
-                r"se notifico|se notificó)\b",
-            ),
-            (
-                "PRESENTACION",
-                r"\b(?:presentado|presentada|presento|presentó|"
-                r"se presento|se presentó)\b",
-            ),
-        ]
+        patrones = [(ETAPA_DE[k], patron_positivo(k)) for k in VERBOS]
 
         ocurrencias = []
+
+        # -------------------------------------------------
+        # AUTORIZACION POR "OTORGAR".
+        #
+        # Reconoce especificamente:
+        #   "la autorizacion fue otorgada"
+        #   "la autorizacion no fue otorgada"
+        #   "la autorizacion ha sido otorgada"
+        #
+        # Se mantiene separado de VERBOS para evitar
+        # falsos positivos con el verbo "otorgar".
+        # -------------------------------------------------
+        patron_autorizacion_otorgada = (
+            r"\bautorizacion\s+"
+            r"(?P<negacion>no\s+)?"
+            r"(?:(?:fue|ha\s+sido|habia\s+sido)\s+)?"
+            r"otorgad[ao]\b"
+        )
+
+        for m in re.finditer(patron_autorizacion_otorgada, t):
+            ocurrencias.append({
+                "inicio": m.start(),
+                "fin": m.end(),
+                "etapa": "AUTORIZACION",
+                "negada": bool(m.group("negacion")),
+            })
 
         for etapa, patron in patrones:
             for m in re.finditer(patron, t):
@@ -1543,6 +1552,55 @@ class TypificationEngine:
                 if contexto_niega(contexto_previo):
                     negada = True
 
+                # Sustantivo + negacion posterior:
+                # "la presentacion del informe no fue realizada"
+                _texto_m = m.group(0)
+
+                # Negacion de la accion expresada con el sustantivo
+                # VERIFICACION:
+                # "no realizo la verificacion"
+                # "no efectuo la verificacion"
+                # "no llevo a cabo la verificacion"
+                # La regla se limita a esta etapa y a este sustantivo.
+                if (
+                    etapa == "VERIFICACION"
+                    and _texto_m == "verificacion"
+                    and re.search(
+                        r"\bno\s+(?:(?:realizo|efectuo)\s+(?:la\s+)?|"
+                        r"llevo\s+a\s+cabo\s+(?:la\s+)?)$",
+                        contexto_previo,
+                    )
+                ):
+                    negada = True
+
+                # AUTORIZACION: si el sustantivo forma parte de
+                # "autorizacion ... otorgada", la ocurrencia
+                # especifica ya fue creada por el patron especial.
+                # No registrar nuevamente el sustantivo.
+                if (
+                    etapa == "AUTORIZACION"
+                    and _texto_m == "autorizacion"
+                    and re.match(
+                        r"\s+(?:no\s+)?(?:(?:fue|ha\s+sido|habia\s+sido)\s+)?otorgad[ao]\b",
+                        t[fin_accion:]
+                    )
+                ):
+                    continue
+
+                if _texto_m == VERBOS_SUSTANTIVO.get(etapa, "") or _texto_m in _SUSTANTIVOS:
+                    _despues = t[fin_accion:fin_accion + 80]
+                    if re.search(
+                        r"\b(?:no\s+(?:fue|se|ha\s+sido)|nunca\s+fue)\s+"
+                        r"(?:realizad[oa]|efectuad[oa]|cumplid[oa]|ejecutad[oa])\b",
+                        _despues
+                    ):
+                        negada = True
+
+                # "sin notificacion previa": sin + sustantivo es una condicion,
+                # no la omision de la accion.
+                if _texto_m in _SUSTANTIVOS and re.search(r"\bsin\s*$", contexto_previo):
+                    continue
+
                 ocurrencias.append({
                     "inicio": inicio_accion,
                     "fin": fin_accion,
@@ -1550,20 +1608,15 @@ class TypificationEngine:
                     "negada": negada,
                 })
 
-        claves_por_etapa = {
-            "ELABORACION": ["ELABORACION", "EMISION", "SUSCRIPCION"],
-            "REMISION": ["REMISION", "NOTIFICACION"],
-            "PRESENTACION": ["PRESENTACION"],
-        }
-        for etapa_om, claves_om in claves_por_etapa.items():
-            for clave_om in claves_om:
-                for ini_om, fin_om in omisiones(t, clave_om):
-                    ocurrencias.append({
-                        "inicio": ini_om,
-                        "fin": fin_om,
-                        "etapa": etapa_om,
-                        "negada": True,
-                    })
+        for clave_om in VERBOS:
+            etapa_om = ETAPA_DE[clave_om]
+            for ini_om, fin_om in omisiones(t, clave_om):
+                ocurrencias.append({
+                    "inicio": ini_om,
+                    "fin": fin_om,
+                    "etapa": etapa_om,
+                    "negada": True,
+                })
 
         ocurrencias.sort(key=lambda x: x["inicio"])
 
@@ -1591,7 +1644,9 @@ class TypificationEngine:
                     x for x in limpias
                     if not (
                         x["etapa"] == o["etapa"]
-                        and abs(x["inicio"] - o["inicio"]) < 100
+                        and not x["negada"]
+                        and x["inicio"] < o["fin"]
+                        and o["inicio"] < x["fin"]
                     )
                 ]
 
@@ -1629,6 +1684,11 @@ class TypificationEngine:
                 or "fuera de plazo" in contexto
                 or "fuera de término" in contexto
                 or "fuera de termino" in contexto
+                or "con retraso" in contexto
+                or "con demora" in contexto
+                or "extemporane" in contexto
+                or "tardiamente" in contexto
+                or "vencido el plazo" in contexto
             ):
                 estado_temporal = "FUERA_DE_PLAZO"
             elif (
@@ -1636,6 +1696,9 @@ class TypificationEngine:
                 or "dentro de plazo" in contexto
                 or "dentro del término" in contexto
                 or "dentro del termino" in contexto
+                or "oportunamente" in contexto
+                or "de manera oportuna" in contexto
+                or "en plazo" in contexto
             ):
                 estado_temporal = "DENTRO_DE_PLAZO"
             else:
@@ -1651,6 +1714,19 @@ class TypificationEngine:
                 estado = estado_temporal
 
             eventos.append((o["etapa"], estado))
+            _pos.append((o["inicio"], o["fin"]))
+
+        # Propagacion temporal: "elaborado y remitido fuera del plazo"
+        for i in range(len(eventos) - 2, -1, -1):
+            etapa_i, est_i = eventos[i]
+            est_j = eventos[i + 1][1]
+            if est_i != "SIN_INFORMACION_TEMPORAL":
+                continue
+            if est_j not in ("FUERA_DE_PLAZO", "DENTRO_DE_PLAZO"):
+                continue
+            entre = t[_pos[i][1]:_pos[i + 1][0]]
+            if re.fullmatch(r"(?:\s+(?:el|la|los|las)\s+\w+(?:\s+de\s+\w+)?)?\s*(?:,\s*y|,|y)\s*(?:fue\s+|se\s+|lo\s+|la\s+|los\s+|las\s+)?", entre):
+                eventos[i] = (etapa_i, est_j)
 
         # ---------------------------------------------------------
         # Coordinación negativa explícita
@@ -1711,6 +1787,18 @@ class TypificationEngine:
 
         eventos = self._parsear_eventos(texto)
 
+        # No inferir incumplimiento temporal cuando los unicos
+        # eventos detectados son autorizacion/verificacion fuera de plazo.
+        # Estas acciones requieren una regla y contexto especificos.
+        etapas_sin_plazo_automatico = {"AUTORIZACION", "VERIFICACION"}
+
+        if eventos and all(
+            etapa in etapas_sin_plazo_automatico
+            and estado == "FUERA_DE_PLAZO"
+            for etapa, estado in eventos
+        ):
+            return "NO DETERMINADO"
+
         etapas_incumplidas = [
             (etapa, estado)
             for etapa, estado in eventos
@@ -1719,6 +1807,8 @@ class TypificationEngine:
         ]
 
         nombres = {
+            "AUTORIZACION": "AUTORIZACIÓN",
+            "VERIFICACION": "VERIFICACIÓN",
             "ELABORACION": "ELABORACIÓN",
             "EMISION": "EMISIÓN",
             "SUSCRIPCION": "SUSCRIPCIÓN",
@@ -1727,6 +1817,74 @@ class TypificationEngine:
             "NOTIFICACION": "NOTIFICACIÓN",
         }
 
+        # ============================================================
+        # CASO MIXTO EN UNA MISMA ETAPA
+        # ============================================================
+        # Ejemplo:
+        #   REMISION -> DENTRO_DE_PLAZO
+        #   REMISION -> NO_EJECUTADO
+        #
+        # Conservamos ambos hechos cuando pertenecen a la misma etapa.
+        # No altera la prioridad existente entre etapas diferentes.
+        # ============================================================
+
+        etapas_mixtas = []
+
+        for etapa in dict.fromkeys(etapa for etapa, _ in eventos):
+
+            estados_etapa = [
+                estado
+                for etapa_evento, estado in eventos
+                if etapa_evento == etapa
+            ]
+
+            tiene_dentro = "DENTRO_DE_PLAZO" in estados_etapa
+
+            tiene_negativo = any(
+                estado == "FUERA_DE_PLAZO"
+                or estado == "NO_EJECUTADO"
+                or estado.startswith("NO_EJECUTADO_")
+                for estado in estados_etapa
+            )
+
+            if tiene_dentro and tiene_negativo:
+                etapas_mixtas.append(etapa)
+
+        if etapas_mixtas:
+            partes_mixtas = []
+
+            for etapa in etapas_mixtas:
+
+                estados_etapa = [
+                    estado
+                    for etapa_evento, estado in eventos
+                    if etapa_evento == etapa
+                ]
+
+                nombre = nombres.get(etapa)
+
+                if nombre is None:
+                    continue
+
+                if "DENTRO_DE_PLAZO" in estados_etapa:
+                    partes_mixtas.append("CUMPLIMIENTO")
+
+                if "FUERA_DE_PLAZO" in estados_etapa:
+                    partes_mixtas.append(
+                        f"INCUMPLIMIENTO DE PLAZO ({nombre})"
+                    )
+
+                if any(
+                    estado == "NO_EJECUTADO"
+                    or estado.startswith("NO_EJECUTADO_")
+                    for estado in estados_etapa
+                ):
+                    partes_mixtas.append(
+                        f"OMISIÓN - NO {nombre}"
+                    )
+
+            if partes_mixtas:
+                return " + ".join(dict.fromkeys(partes_mixtas))
         if etapas_incumplidas:
             partes = []
 
@@ -1748,7 +1906,10 @@ class TypificationEngine:
             and e != "FUERA_DE_PLAZO"
             for _, e in eventos
         ):
-            return "CUMPLIMIENTO"
+            if any(e == "DENTRO_DE_PLAZO" for _, e in eventos):
+                return "CUMPLIMIENTO"
+            # Si no hay informacion temporal concluyente,
+            # continuar con los indicadores textuales explicitos.
 
         # Negaciones e incumplimientos explícitos: tienen prioridad
         # sobre cualquier indicador positivo de cumplimiento.
@@ -2530,6 +2691,8 @@ if __name__ == "__main__":
     print("=== PRUEBA TYPOFICATION ENGINE V3.1 ===")
     print(resultado.to_dict())
     print("=== PRUEBA COMPLETADA ===")
+
+
 
 
 
