@@ -8,3 +8,45 @@ app/core/typification_engine_backup_*.py
 _backup_core_*/
 __pycache__/
 *.pyc
+
+# Backups y archivos temporales de trabajo
+*.bak*
+*_ANTES_*.py
+*_backup_*.py
+*_backup_*.json
+_backup_*/
+antes_*.txt
+despues*.txt
+baseline_*.txt
+bloque_*.txt
+test_tmp.py
+__pycache__/
+
+# Backups manuales
+*.bak_*
+*.backup_*
+*.estable*
+*.pre_mixto_*
+*_ANTES_FIX_*
+*respaldo*.txt
+_snapshot_*.zip
+
+# Diagnosticos y parches
+diff_*.txt
+antes_*.txt
+despues*.txt
+baseline_*.txt
+bloque_*.txt
+casos*.txt
+funcion_temporal_*.txt
+parche_*.txt
+parte_*.txt
+
+# Scripts oneoff
+aplicar*.py
+probar*.py
+reparar_*.py
+prueba_*.py
+
+# Carpeta de archivo
+_archivo/

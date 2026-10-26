@@ -6,12 +6,12 @@ OM = "OMISI\u00d3N"
 AC = "ACCI\u00d3N"
 
 CASOS = [
-    ("El servidor no realiz\u00f3 la verificaci\u00f3n.", OM),
-    ("El servidor no realizo la verificacion.", OM),
-    ("El servidor no verific\u00f3 el expediente.", OM),
+    ("El servidor no realiz\u00f3 la verificaci\u00f3n.", "OMISI\u00d3N - NO VERIFICACI\u00d3N"),
+    ("El servidor no realizo la verificacion.", "OMISI\u00d3N - NO VERIFICACI\u00d3N"),
+    ("El servidor no verific\u00f3 el expediente.", "OMISI\u00d3N - NO VERIFICACI\u00d3N"),
     ("El servidor autoriz\u00f3 el pago.", AC),
     ("El servidor autorizo el pago.", AC),
-    ("EL SERVIDOR NO REALIZ\u00d3 LA VERIFICACI\u00d3N.", OM),
+    ("EL SERVIDOR NO REALIZ\u00d3 LA VERIFICACI\u00d3N.", "OMISI\u00d3N - NO VERIFICACI\u00d3N"),
     ("El servidor omiti\u00f3 informar.", OM),
     ("El servidor no cumpli\u00f3 sus funciones.", OM),
     ("El servidor incumpli\u00f3 sus funciones.", OM),
