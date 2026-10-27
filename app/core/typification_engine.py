@@ -42,6 +42,19 @@ class TypificationResult:
         return asdict(self)
 
 
+def _anotar_regimen(normas, base, regimen):
+    """Agrega regimenes_aplicables; si no hay regimen, lo advierte (no adivina)."""
+    por_id = {n["id"]: n.get("regimen", []) for n in base}
+    for n in normas:
+        n["regimenes_aplicables"] = list(por_id.get(n["id"], []))
+        n["regimen_especificado"] = bool(regimen)
+        if not regimen:
+            aviso = ("Régimen no especificado: la norma puede no corresponder "
+                     "al régimen del servidor.")
+            n["advertencia"] = (n["advertencia"] + " " + aviso).strip()
+    return normas
+
+
 def _cita_base(n):
     """Cita sin placeholders: si el articulo no esta determinado, lo dice."""
     from app.core.normas_verificadas import MARCADORES_PLACEHOLDER
@@ -486,7 +499,7 @@ class TypificationEngine:
             modalidades=modalidades,
             componente_temporal=componente_temporal,
             modalidades_detalle=modalidades_detalle,
-            normas_candidatas=normas_candidatas,
+            normas_candidatas=_anotar_regimen(normas_candidatas, _candidatas, regimen),
             preguntas_para_el_usuario=preguntas_para_el_usuario,
         )
 
