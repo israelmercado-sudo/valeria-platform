@@ -39,7 +39,9 @@ class TypificationResult:
     calculo_plazo: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
+        d = asdict(self)
+        d["aviso_legal"] = AVISO_LEGAL
+        return d
 
 
 def _anotar_gatillo(normas, base, tipo_conducta):
@@ -77,6 +79,13 @@ def _cita_base(n):
     if not art or any(m in art for m in MARCADORES_PLACEHOLDER):
         return f'{n["norma"]} (artículo por determinar)'
     return f'{n["norma"]}, art. {art}'
+
+
+AVISO_LEGAL = (
+    "Resultado preliminar de orientación. No constituye asesoría jurídica ni "
+    "una tipificación definitiva. Las normas candidatas no verificadas deben "
+    "ser contrastadas por un operador jurídico antes de usarse como sustento."
+)
 
 
 def _verif(n):
