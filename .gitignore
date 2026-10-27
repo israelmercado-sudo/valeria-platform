@@ -54,3 +54,6 @@ _archivo/
 app/core/_archive/
 app/core/*.bak*
 app/core/*_backup*.py
+
+app/core/*_PASO*_OK.py
+app/core/*_ANTES_*.py
