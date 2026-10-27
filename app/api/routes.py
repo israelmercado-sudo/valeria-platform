@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from app.core.legal_engine import valeria_engine
+from app.core.normas_verificadas import como_candidata
 
 
 router = APIRouter()
@@ -14,6 +15,9 @@ AVISO_LEGAL = (
     "(SPIJ / El Peruano); un operador jur\u00eddico competente debe contrastarlos "
     "antes de usarlos en un procedimiento administrativo."
 )
+
+# Normas que legal_engine / prescription_engine citan hoy en texto fijo.
+NORMAS_CITADAS_ANALISIS = ("LEY30057_ART94", "RGLEY30057_ART97_1")
 
 
 class ConsultaRequest(BaseModel):
@@ -28,6 +32,7 @@ def analizar(request: ConsultaRequest):
         content={
             "consulta": request.consulta,
             "aviso_legal": AVISO_LEGAL,
+            "normas_citadas": [como_candidata(i) for i in NORMAS_CITADAS_ANALISIS],
             "analisis": resultado
         },
         media_type="application/json"
