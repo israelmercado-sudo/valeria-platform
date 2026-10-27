@@ -99,6 +99,40 @@ NORMAS = {
         "conductas_aplicables": [],
         "conductas_validadas_por": None,
     },
+    "LEY30057_ART94": {
+        "id": "LEY30057_ART94",
+        "cita_completa": "Ley 30057 - Ley del Servicio Civil, art. 94",
+        "jurisdiccion": JURISDICCION_PE,
+        "texto_literal": None,
+        "url_fuente": None,
+        "fecha_consulta": None,
+        "verificado_por": None,
+        "vigencia": None,
+        "resumen_secundario": (
+            "Prescripci\u00f3n de la potestad para iniciar el procedimiento "
+            "administrativo disciplinario (seg\u00fan el fundamento actual de "
+            "prescription_engine; sin verificar contra fuente oficial)."
+        ),
+        "conductas_aplicables": [],
+        "conductas_validadas_por": None,
+    },
+    "RGLEY30057_ART97_1": {
+        "id": "RGLEY30057_ART97_1",
+        "cita_completa": "Reglamento General de la Ley 30057 (DS 040-2014-PCM), art. 97.1",
+        "jurisdiccion": JURISDICCION_PE,
+        "texto_literal": None,
+        "url_fuente": None,
+        "fecha_consulta": None,
+        "verificado_por": None,
+        "vigencia": None,
+        "resumen_secundario": (
+            "Plazos de prescripci\u00f3n del procedimiento disciplinario "
+            "(seg\u00fan el fundamento actual de prescription_engine; sin "
+            "verificar contra fuente oficial)."
+        ),
+        "conductas_aplicables": [],
+        "conductas_validadas_por": None,
+    },
     # El artículo concreto del TUO 27444 aún no está identificado.
     # No se agrega con "<<VERIFICAR>>": se incorpora cuando se confirme.
 }
