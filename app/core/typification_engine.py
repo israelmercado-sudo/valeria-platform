@@ -42,6 +42,15 @@ class TypificationResult:
         return asdict(self)
 
 
+def _cita_base(n):
+    """Cita sin placeholders: si el articulo no esta determinado, lo dice."""
+    from app.core.normas_verificadas import MARCADORES_PLACEHOLDER
+    art = str(n.get("articulo", ""))
+    if not art or any(m in art for m in MARCADORES_PLACEHOLDER):
+        return f'{n["norma"]} (artículo por determinar)'
+    return f'{n["norma"]}, art. {art}'
+
+
 def _verif(n):
     """Fail-closed: verificada solo si la base lo indica Y el registro la confirma."""
     from app.core.normas_verificadas import verificada_por_id
@@ -435,7 +444,7 @@ class TypificationEngine:
         normas_candidatas = [
             {
                 "id": n["id"],
-                "cita": f'{n["norma"]}, art. {n["articulo"]}'
+                "cita": _cita_base(n)
                 + (f', inciso {n["inciso"]}' if n["inciso"] else ""),
                 "verificado": _verif(n),
                 "advertencia": (
