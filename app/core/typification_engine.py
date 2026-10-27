@@ -42,6 +42,21 @@ class TypificationResult:
         return asdict(self)
 
 
+def _anotar_gatillo(normas, base, tipo_conducta):
+    """Trazabilidad: que parte del tipo de conducta activo cada norma."""
+    partes = [p.strip() for p in tipo_conducta.split(" + ")]
+    gat = {n["id"]: n.get("gatillos", []) for n in base}
+    for n in normas:
+        activos = [p for p in partes if p in gat.get(n["id"], [])]
+        n["gatillo_activado"] = activos
+        n["razon_seleccion"] = (
+            "Seleccionada porque la conducta clasificada ("
+            + "; ".join(activos) + ") coincide con su gatillo."
+            if activos else "Sin gatillo identificado."
+        )
+    return normas
+
+
 def _anotar_regimen(normas, base, regimen):
     """Agrega regimenes_aplicables; si no hay regimen, lo advierte (no adivina)."""
     por_id = {n["id"]: n.get("regimen", []) for n in base}
@@ -499,7 +514,9 @@ class TypificationEngine:
             modalidades=modalidades,
             componente_temporal=componente_temporal,
             modalidades_detalle=modalidades_detalle,
-            normas_candidatas=_anotar_regimen(normas_candidatas, _candidatas, regimen),
+            normas_candidatas=_anotar_gatillo(
+                _anotar_regimen(normas_candidatas, _candidatas, regimen),
+                _candidatas, tipo_conducta),
             preguntas_para_el_usuario=preguntas_para_el_usuario,
         )
 
