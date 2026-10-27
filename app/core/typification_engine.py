@@ -1675,13 +1675,13 @@ class TypificationEngine:
                 maxsplit=1
             )[0]
 
-            # --- 1. Estado de ejecución (independiente de la temporalidad) ---
+            # --- 1. Estado de ejecucion (independiente de la temporalidad) ---
             ejecutado = not o["negada"]
 
-            # --- 1.bis Rectificación temporal explícita ---
+            # --- 1.bis Rectificacion temporal explicita ---
             # "no fue X fuera del plazo, sino dentro del plazo"
-            # La primera proposición niega la CALIFICACIÓN temporal,
-            # no la ejecución. Resultado: se hizo, dentro del plazo.
+            # La primera proposicion niega la CALIFICACION temporal,
+            # no la ejecucion. Resultado: se hizo, dentro del plazo.
             _rectificacion = re.search(
                 r"\bno\s+(?:fue\s+|se\s+|ha\s+sido\s+|habia\s+sido\s+)?"
                 r"(?:elaborad|remitid|notificad|presentad|suscrit|emitid)[oa]s?"
@@ -1705,7 +1705,6 @@ class TypificationEngine:
                 if (
                     "fuera del plazo" in contexto
                     or "fuera de plazo" in contexto
-                    or "fuera de término" in contexto
                     or "fuera de termino" in contexto
                     or "con retraso" in contexto
                     or "con demora" in contexto
@@ -1717,7 +1716,6 @@ class TypificationEngine:
                 elif (
                     "dentro del plazo" in contexto
                     or "dentro de plazo" in contexto
-                    or "dentro del término" in contexto
                     or "dentro del termino" in contexto
                     or "oportunamente" in contexto
                     or "de manera oportuna" in contexto
@@ -1727,7 +1725,7 @@ class TypificationEngine:
                 else:
                     estado_temporal = "SIN_INFORMACION_TEMPORAL"
 
-            # --- 3. Combinar ejecución + temporalidad ---
+            # --- 3. Combinar ejecucion + temporalidad ---
             if not ejecutado:
                 if estado_temporal != "SIN_INFORMACION_TEMPORAL":
                     estado = f"NO_EJECUTADO_{estado_temporal}"
