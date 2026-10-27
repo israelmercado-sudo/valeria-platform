@@ -57,3 +57,5 @@ app/core/*_backup*.py
 
 app/core/*_PASO*_OK.py
 app/core/*_ANTES_*.py
+
+_ci_test*/
