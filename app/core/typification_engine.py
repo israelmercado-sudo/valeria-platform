@@ -1666,7 +1666,7 @@ class TypificationEngine:
             else:
                 limite = len(t)
 
-            contexto = t[inicio_accion:limite]
+            contexto = t[max(0, inicio_accion - 30):limite]
 
             # Un adversativo introduce una nueva proposición.
             contexto = re.split(
