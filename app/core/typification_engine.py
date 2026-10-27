@@ -1675,34 +1675,57 @@ class TypificationEngine:
                 maxsplit=1
             )[0]
 
-             # --- 1. Estado de ejecución (independiente de la temporalidad) ---
+            # --- 1. Estado de ejecución (independiente de la temporalidad) ---
             ejecutado = not o["negada"]
 
-            # --- 2. Componente temporal (se detecta SIEMPRE) ---
-            if (
-                "fuera del plazo" in contexto
-                or "fuera de plazo" in contexto
-                or "fuera de término" in contexto
-                or "fuera de termino" in contexto
-                or "con retraso" in contexto
-                or "con demora" in contexto
-                or "extemporane" in contexto
-                or "tardiamente" in contexto
-                or "vencido el plazo" in contexto
-            ):
-                estado_temporal = "FUERA_DE_PLAZO"
-            elif (
-                "dentro del plazo" in contexto
-                or "dentro de plazo" in contexto
-                or "dentro del término" in contexto
-                or "dentro del termino" in contexto
-                or "oportunamente" in contexto
-                or "de manera oportuna" in contexto
-                or "en plazo" in contexto
-            ):
+            # --- 1.bis Rectificación temporal explícita ---
+            # "no fue X fuera del plazo, sino dentro del plazo"
+            # La primera proposición niega la CALIFICACIÓN temporal,
+            # no la ejecución. Resultado: se hizo, dentro del plazo.
+            _rectificacion = re.search(
+                r"\bno\s+(?:fue\s+|se\s+|ha\s+sido\s+|habia\s+sido\s+)?"
+                r"(?:elaborad|remitid|notificad|presentad|suscrit|emitid)[oa]s?"
+                r"\s+(?:fuera\s+del?\s+(?:plazo|termino|t[eé]rmino)"
+                r"|con\s+(?:retraso|demora)"
+                r"|extemporane\w*"
+                r"|tardiamente)"
+                r"\s*,\s*(?:sino|pero|aunque)\s+"
+                r"(?:dentro\s+del?\s+(?:plazo|termino|t[eé]rmino)"
+                r"|oportunamente"
+                r"|en\s+plazo"
+                r"|de\s+manera\s+oportuna)",
+                contexto,
+            )
+
+            if _rectificacion:
+                ejecutado = True
                 estado_temporal = "DENTRO_DE_PLAZO"
             else:
-                estado_temporal = "SIN_INFORMACION_TEMPORAL"
+                # --- 2. Componente temporal (se detecta SIEMPRE) ---
+                if (
+                    "fuera del plazo" in contexto
+                    or "fuera de plazo" in contexto
+                    or "fuera de término" in contexto
+                    or "fuera de termino" in contexto
+                    or "con retraso" in contexto
+                    or "con demora" in contexto
+                    or "extemporane" in contexto
+                    or "tardiamente" in contexto
+                    or "vencido el plazo" in contexto
+                ):
+                    estado_temporal = "FUERA_DE_PLAZO"
+                elif (
+                    "dentro del plazo" in contexto
+                    or "dentro de plazo" in contexto
+                    or "dentro del término" in contexto
+                    or "dentro del termino" in contexto
+                    or "oportunamente" in contexto
+                    or "de manera oportuna" in contexto
+                    or "en plazo" in contexto
+                ):
+                    estado_temporal = "DENTRO_DE_PLAZO"
+                else:
+                    estado_temporal = "SIN_INFORMACION_TEMPORAL"
 
             # --- 3. Combinar ejecución + temporalidad ---
             if not ejecutado:
