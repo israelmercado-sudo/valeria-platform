@@ -50,3 +50,7 @@ prueba_*.py
 
 # Carpeta de archivo
 _archivo/
+
+app/core/_archive/
+app/core/*.bak*
+app/core/*_backup*.py
