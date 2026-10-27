@@ -1812,19 +1812,26 @@ class TypificationEngine:
             if unicodedata.category(c) != "Mn"
         )
 
+        # =========================================================
+        # NEGACION EPISTEMICA
+        #
+        # "No se ha acreditado que el informe fuera elaborado
+        #  fuera del plazo" NO afirma el incumplimiento: afirma
+        # que NO ESTA ACREDITADO. El motor no debe tipificar
+        # como incumplimiento cuando el hecho esta en duda.
+        # =========================================================
+        patrones_epistemicos = (
+            r"^no\s+se\s+ha\s+acreditad[oa]\s+que\b",
+            r"^no\s+se\s+acredito\s+que\b",
+            r"^no\s+consta\s+que\b",
+            r"^no\s+obra(?:\s+en\s+el\s+expediente)?\s+que\b",
+            r"^no\s+se\s+encuentra\s+acreditad[oa]\s+que\b",
+        )
+        for patron in patrones_epistemicos:
+            if re.match(patron, texto_plano):
+                return "NO DETERMINADO"
+
         eventos = self._parsear_eventos(texto)
-
-        # No inferir incumplimiento temporal cuando los unicos
-        # eventos detectados son autorizacion/verificacion fuera de plazo.
-        # Estas acciones requieren una regla y contexto especificos.
-        etapas_sin_plazo_automatico = {"AUTORIZACION", "VERIFICACION"}
-
-        if eventos and all(
-            etapa in etapas_sin_plazo_automatico
-            and estado == "FUERA_DE_PLAZO"
-            for etapa, estado in eventos
-        ):
-            return "NO DETERMINADO"
 
         etapas_incumplidas = [
             (etapa, estado)
@@ -2026,6 +2033,8 @@ class TypificationEngine:
 
     def _reconciliar_modalidades_temporales(self, conducta: str) -> dict:
         """
+        eventos = self._parsear_eventos(conducta)
+
         V3.5.2 - Reconciliación temporal por modalidad.
 
         Utiliza _parsear_eventos() como fuente única de eventos.
