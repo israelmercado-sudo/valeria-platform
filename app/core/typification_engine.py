@@ -1666,14 +1666,10 @@ class TypificationEngine:
             else:
                 limite = len(t)
 
-            contexto = t[max(0, inicio_accion - 30):limite]
+            contexto = t[max(0, inicio_accion - 10):limite]
 
-            # Un adversativo introduce una nueva proposición.
-            contexto = re.split(
-                r"\b(?:pero|sin embargo|aunque)\b",
-                contexto,
-                maxsplit=1
-            )[0]
+            # (Sin split por adversativos: cada verbo se evalua
+            #  en su propio contexto.)
 
             # --- 1. Estado de ejecucion (independiente de la temporalidad) ---
             ejecutado = not o["negada"]
@@ -1702,9 +1698,22 @@ class TypificationEngine:
                 estado_temporal = "DENTRO_DE_PLAZO"
             else:
                 # --- 2. Componente temporal (se detecta SIEMPRE) ---
+                # Se prioriza cumplimiento sobre incumplimiento cuando
+                # ambos aparecen en el contexto (oraciones con "aunque").
                 if (
+                    "dentro del plazo" in contexto
+                    or "dentro de plazo" in contexto
+                    or "dentro del término" in contexto
+                    or "dentro del termino" in contexto
+                    or "oportunamente" in contexto
+                    or "de manera oportuna" in contexto
+                    or "en plazo" in contexto
+                ):
+                     estado_temporal = "DENTRO_DE_PLAZO"
+                elif (
                     "fuera del plazo" in contexto
                     or "fuera de plazo" in contexto
+                    or "fuera de término" in contexto
                     or "fuera de termino" in contexto
                     or "con retraso" in contexto
                     or "con demora" in contexto
@@ -1713,15 +1722,6 @@ class TypificationEngine:
                     or "vencido el plazo" in contexto
                 ):
                     estado_temporal = "FUERA_DE_PLAZO"
-                elif (
-                    "dentro del plazo" in contexto
-                    or "dentro de plazo" in contexto
-                    or "dentro del termino" in contexto
-                    or "oportunamente" in contexto
-                    or "de manera oportuna" in contexto
-                    or "en plazo" in contexto
-                ):
-                    estado_temporal = "DENTRO_DE_PLAZO"
                 else:
                     estado_temporal = "SIN_INFORMACION_TEMPORAL"
 
@@ -1761,10 +1761,16 @@ class TypificationEngine:
                 if e != ("ELABORACION", "SIN_INFORMACION_TEMPORAL")
             ]
 
-            if ("ELABORACION", "NO_EJECUTADO") not in eventos:
+            if not any(
+                etapa == "ELABORACION" and estado.startswith("NO_EJECUTADO")
+                for etapa, estado in eventos
+            ):
                 eventos.insert(0, ("ELABORACION", "NO_EJECUTADO"))
 
-            if ("REMISION", "NO_EJECUTADO") not in eventos:
+            if not any(
+                etapa == "REMISION" and estado.startswith("NO_EJECUTADO")
+                for etapa, estado in eventos
+            ):
                 eventos.append(("REMISION", "NO_EJECUTADO"))
 
         # ---------------------------------------------------------
