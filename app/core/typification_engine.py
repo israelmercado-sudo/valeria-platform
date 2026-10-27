@@ -42,6 +42,12 @@ class TypificationResult:
         return asdict(self)
 
 
+def _verif(n):
+    """Fail-closed: verificada solo si la base lo indica Y el registro la confirma."""
+    from app.core.normas_verificadas import verificada_por_id
+    return bool(n.get("verificado")) and verificada_por_id(n["id"])
+
+
 class TypificationEngine:
     """
     Motor preliminar de análisis de tipificación disciplinaria.
@@ -431,10 +437,10 @@ class TypificationEngine:
                 "id": n["id"],
                 "cita": f'{n["norma"]}, art. {n["articulo"]}'
                 + (f', inciso {n["inciso"]}' if n["inciso"] else ""),
-                "verificado": n["verificado"],
+                "verificado": _verif(n),
                 "advertencia": (
                     ""
-                    if n["verificado"]
+                    if _verif(n)
                     else "Norma pendiente de verificación por operador jurídico."
                 ),
             }

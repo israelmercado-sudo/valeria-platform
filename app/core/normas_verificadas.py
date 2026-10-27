@@ -169,3 +169,9 @@ def como_candidata(norma_id: str) -> dict:
         salida["fuente"] = n["url_fuente"]
         salida["fecha_consulta"] = n["fecha_consulta"]
     return salida
+
+
+def verificada_por_id(norma_id: str) -> bool:
+    """True solo si el id existe en el registro y esa norma pasa todos los controles."""
+    n = NORMAS.get(norma_id)
+    return n is not None and esta_verificada(n)
