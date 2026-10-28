@@ -1,4 +1,4 @@
-﻿# app/core/normas_verificadas.py
+# app/core/normas_verificadas.py
 """
 Registro de normas de Valeria.
 
@@ -252,7 +252,6 @@ def _cargar_textos_literales():
             n["fuente_del_texto"] = d.get("fuente_del_texto")
 
 
-_cargar_textos_literales()
 
 
 # --- Ley 30057: régimen sancionador (candidatas, pendientes de verificación) ---
@@ -349,3 +348,6 @@ NORMAS.update({
         "conductas_validadas_por": None,
     },
 })
+
+
+_cargar_textos_literales()
