@@ -5,7 +5,9 @@
     "articulo": "85",
     "inciso": "a",
     "texto": "<<COPIAR LITERAL DESDE EL PERUANO>>",
-    "regimen": ["30057"],
+    "regimen": [
+      "30057"
+    ],
     "gatillos": [
       "OMISIÓN - NO ELABORACIÓN",
       "OMISIÓN - NO REMISIÓN",
@@ -24,7 +26,9 @@
     "articulo": "85",
     "inciso": "d",
     "texto": "<<COPIAR LITERAL>>",
-    "regimen": ["30057"],
+    "regimen": [
+      "30057"
+    ],
     "gatillos": [
       "OMISIÓN - NO ELABORACIÓN",
       "OMISIÓN - NO REMISIÓN",
@@ -40,11 +44,16 @@
   },
   {
     "id": "TUO27444_DEBERES_AUTORIDADES",
-    "norma": "TUO de la Ley 27444 - Ley del Procedimiento Administrativo General",
-    "articulo": "<<VERIFICAR>>",
+    "norma": "TUO de la Ley 27444 - Ley del Procedimiento Administrativo General (DS 006-2026-JUS)",
+    "articulo": "75",
     "inciso": "",
     "texto": "<<COPIAR LITERAL>>",
-    "regimen": ["30057", "276", "728", "CAS"],
+    "regimen": [
+      "30057",
+      "276",
+      "728",
+      "CAS"
+    ],
     "gatillos": [
       "INCUMPLIMIENTO DE PLAZO (ELABORACIÓN)",
       "INCUMPLIMIENTO DE PLAZO (REMISIÓN)"

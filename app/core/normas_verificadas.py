@@ -209,3 +209,143 @@ def verificada_por_id(norma_id: str) -> bool:
     """True solo si el id existe en el registro y esa norma pasa todos los controles."""
     n = NORMAS.get(norma_id)
     return n is not None and esta_verificada(n)
+
+
+# --- TEXTOS LITERALES (aplicar_textos_normas.py) ---
+# Cargan el texto literal desde app/data/normas_textos_literales.json.
+# Esto NO verifica nada: una norma sigue siendo candidata hasta tener URL oficial,
+# fecha de consulta, responsable y vigencia confirmada.
+import json as _json
+from pathlib import Path as _Path
+
+_NUEVAS = {
+    "TUO27444_DEBERES_AUTORIDADES": (
+        "TUO de la Ley 27444 (DS 006-2026-JUS), art. 75 - Deberes de las autoridades en los procedimientos",
+        "Deberes de las autoridades respecto del procedimiento administrativo "
+        "(texto aportado por el usuario; sin verificar contra fuente oficial).",
+    ),
+    "TUO27444_ART239": (
+        "TUO de la Ley 27444 (DS 006-2026-JUS), art. 239 - Faltas administrativas",
+        "Faltas administrativas de autoridades y personal en el tramite de procedimientos "
+        "(texto aportado por el usuario; sin verificar contra fuente oficial).",
+    ),
+}
+for _id, (_cita, _res) in _NUEVAS.items():
+    NORMAS.setdefault(_id, {
+        "id": _id, "cita_completa": _cita, "jurisdiccion": JURISDICCION_PE,
+        "texto_literal": None, "url_fuente": None, "fecha_consulta": None,
+        "verificado_por": None, "vigencia": None, "resumen_secundario": _res,
+        "conductas_aplicables": [], "conductas_validadas_por": None,
+    })
+
+
+def _cargar_textos_literales():
+    ruta = _Path(__file__).resolve().parent.parent / "data" / "normas_textos_literales.json"
+    if not ruta.exists():
+        return
+    with open(ruta, encoding="utf-8") as f:
+        datos = _json.load(f)
+    for _id, d in datos.items():
+        n = NORMAS.get(_id)
+        if n is not None and not n.get("texto_literal"):
+            n["texto_literal"] = d["texto_literal"]
+            n["fuente_del_texto"] = d.get("fuente_del_texto")
+
+
+_cargar_textos_literales()
+
+
+# --- Ley 30057: régimen sancionador (candidatas, pendientes de verificación) ---
+NORMAS.update({
+    "LEY30057_ART87": {
+        "id": "LEY30057_ART87",
+        "cita_completa": "Ley 30057 - Ley del Servicio Civil, art. 87 - Determinación de la sanción a las faltas",
+        "jurisdiccion": JURISDICCION_PE,
+        "texto_literal": None,
+        "url_fuente": None,
+        "fecha_consulta": None,
+        "verificado_por": None,
+        "vigencia": None,
+        "resumen_secundario": "La sanción debe ser proporcional a la falta y se determina evaluando condiciones como afectación grave a intereses generales, ocultamiento de la falta, jerarquía y especialidad del servidor, concurrencia, reincidencia, continuidad y beneficio ilícito. La destitución inhabilita para reingresar al Estado por 5 años.",
+        "conductas_aplicables": [],
+        "conductas_validadas_por": None,
+    },
+    "LEY30057_ART88": {
+        "id": "LEY30057_ART88",
+        "cita_completa": "Ley 30057 - Ley del Servicio Civil, art. 88 - Sanciones aplicables",
+        "jurisdiccion": JURISDICCION_PE,
+        "texto_literal": None,
+        "url_fuente": None,
+        "fecha_consulta": None,
+        "verificado_por": None,
+        "vigencia": None,
+        "resumen_secundario": "Sanciones por faltas disciplinarias: amonestación verbal o escrita, suspensión sin goce de remuneraciones y destitución. Toda sanción consta en el legajo.",
+        "conductas_aplicables": [],
+        "conductas_validadas_por": None,
+    },
+    "LEY30057_ART90": {
+        "id": "LEY30057_ART90",
+        "cita_completa": "Ley 30057 - Ley del Servicio Civil, art. 90 - La suspensión y la destitución",
+        "jurisdiccion": JURISDICCION_PE,
+        "texto_literal": None,
+        "url_fuente": None,
+        "fecha_consulta": None,
+        "verificado_por": None,
+        "vigencia": None,
+        "resumen_secundario": "Suspensión sin goce de remuneraciones hasta 365 días calendario, previo procedimiento administrativo disciplinario. Destitución propuesta por el jefe de recursos humanos y aprobada por el titular de la entidad. La apelación la resuelve el Tribunal del Servicio Civil.",
+        "conductas_aplicables": [],
+        "conductas_validadas_por": None,
+    },
+    "LEY30057_ART91": {
+        "id": "LEY30057_ART91",
+        "cita_completa": "Ley 30057 - Ley del Servicio Civil, art. 91 - Graduación de la sanción",
+        "jurisdiccion": JURISDICCION_PE,
+        "texto_literal": None,
+        "url_fuente": None,
+        "fecha_consulta": None,
+        "verificado_por": None,
+        "vigencia": None,
+        "resumen_secundario": "Los actos que imponen sanciones deben estar motivados de modo expreso y claro, identificando la relación entre hechos y faltas y los criterios de determinación. La sanción no es necesariamente correlativa ni automática.",
+        "conductas_aplicables": [],
+        "conductas_validadas_por": None,
+    },
+    "LEY30057_ART92": {
+        "id": "LEY30057_ART92",
+        "cita_completa": "Ley 30057 - Ley del Servicio Civil, art. 92 - Autoridades",
+        "jurisdiccion": JURISDICCION_PE,
+        "texto_literal": None,
+        "url_fuente": None,
+        "fecha_consulta": None,
+        "verificado_por": None,
+        "vigencia": None,
+        "resumen_secundario": "Autoridades del procedimiento disciplinario: jefe inmediato, jefe de recursos humanos, titular de la entidad y Tribunal del Servicio Civil. El secretario técnico precalifica las faltas y no tiene capacidad de decisión.",
+        "conductas_aplicables": [],
+        "conductas_validadas_por": None,
+    },
+    "LEY30057_ART93": {
+        "id": "LEY30057_ART93",
+        "cita_completa": "Ley 30057 - Ley del Servicio Civil, art. 93 - El procedimiento administrativo disciplinario",
+        "jurisdiccion": JURISDICCION_PE,
+        "texto_literal": None,
+        "url_fuente": None,
+        "fecha_consulta": None,
+        "verificado_por": None,
+        "vigencia": None,
+        "resumen_secundario": "Se comunica por escrito al servidor las presuntas faltas y se le otorga 5 días hábiles para presentar descargo y pruebas. Prevé informe oral y la posibilidad de separar al servidor de su función durante el procedimiento.",
+        "conductas_aplicables": [],
+        "conductas_validadas_por": None,
+    },
+    "LEY30057_ART96": {
+        "id": "LEY30057_ART96",
+        "cita_completa": "Ley 30057 - Ley del Servicio Civil, art. 96 - Medidas cautelares",
+        "jurisdiccion": JURISDICCION_PE,
+        "texto_literal": None,
+        "url_fuente": None,
+        "fecha_consulta": None,
+        "verificado_por": None,
+        "vigencia": None,
+        "resumen_secundario": "Tras comunicar por escrito las presuntas faltas, la autoridad puede, con decisión motivada, separar al servidor de su función o exonerarlo de asistir al centro de trabajo, abonándole su remuneración.",
+        "conductas_aplicables": [],
+        "conductas_validadas_por": None,
+    },
+})
