@@ -7,16 +7,19 @@ def test_id_desconocido_nunca_es_verificado():
 
 
 def test_base_dice_verificado_pero_registro_incompleto():
-    # Buscamos una norma que aún NO esté verificada en el sistema
-    # (porque ahora ya tenemos 4 normas verificadas y antes asumíamos que todas estaban vacías)
-    norma_no_verificada = None
-    for nid in NORMAS:
-        if not _verif({"id": nid, "verificado": False}):
-            norma_no_verificada = nid
-            break
-    
-    assert norma_no_verificada is not None, "Todas las normas están verificadas, no se puede probar este caso"
-    assert _verif({"id": norma_no_verificada, "verificado": True}) is False
+    # Usamos una norma ficticia que NO exista en NORMAS.
+    # El diccionario externo dice "verificado: True", pero como el ID no está en
+    # el registro real, el motor debe devolver False y no dejarse engañar.
+    registro_falso = {
+        "id": "LEY_FICTICIA_999",
+        "verificado": True,
+        "texto_literal": None,
+        "url_fuente": None,
+        "fecha_consulta": None,
+        "verificado_por": None,
+        "vigencia": None,
+    }
+    assert _verif(registro_falso) is False
 
 
 def test_base_dice_no_verificado():
