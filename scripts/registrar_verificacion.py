@@ -73,6 +73,18 @@ def main():
     textos = json.loads(TEXTOS.read_text(encoding="utf-8-sig"))
     disciplinarias = json.loads(DISCIPLINARIAS.read_text(encoding="utf-8-sig"))
     ids_validos = set(disciplinarias.keys()) if isinstance(disciplinarias, dict) else set()
+    
+# Unir IDs del JSON con los definidos en código Python
+    try:
+        import sys
+        from pathlib import Path as _Path
+        _root = _Path(__file__).resolve().parent.parent
+        if str(_root) not in sys.path:
+            sys.path.insert(0, str(_root))
+        from app.core.normas_verificadas import NORMAS
+        ids_validos.update(NORMAS.keys())
+    except ImportError:
+        pass
 
     if a.id not in textos or not textos[a.id].get("texto_literal"):
         salir(a.id + " no tiene texto literal cargado en normas_textos_literales.json")

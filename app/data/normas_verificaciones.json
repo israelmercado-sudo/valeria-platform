@@ -1,1 +1,42 @@
-﻿{}
+{
+  "LEY27815_ART6": {
+    "url_fuente": "https://www.gob.pe/institucion/congreso-de-la-republica/normas-legales/828190-27815",
+    "fecha_consulta": "2026-10-29",
+    "verificado_por": "Israel Mercado",
+    "vigencia": {
+      "vigente": true,
+      "modificaciones": [],
+      "derogada_por": null
+    }
+  },
+  "LEY27815_ART7": {
+    "url_fuente": "https://www.gob.pe/institucion/congreso-de-la-republica/normas-legales/828190-27815",
+    "fecha_consulta": "2026-10-29",
+    "verificado_por": "Israel Mercado",
+    "vigencia": {
+      "vigente": true,
+      "modificaciones": [],
+      "derogada_por": null
+    }
+  },
+  "LEY27815_ART8": {
+    "url_fuente": "https://www.gob.pe/institucion/congreso-de-la-republica/normas-legales/828190-27815",
+    "fecha_consulta": "2026-10-29",
+    "verificado_por": "Israel Mercado",
+    "vigencia": {
+      "vigente": true,
+      "modificaciones": [],
+      "derogada_por": null
+    }
+  },
+  "LEY30057_ART85_Q": {
+    "url_fuente": "https://www.congreso.gob.pe/Docs/DGP/DIDP/files/ley_30057.pdf",
+    "fecha_consulta": "2026-10-29",
+    "verificado_por": "Israel Mercado",
+    "vigencia": {
+      "vigente": true,
+      "modificaciones": [],
+      "derogada_por": null
+    }
+  }
+}
