@@ -85,3 +85,24 @@ def test_candidata_no_verificada_lleva_advertencia():
             assert vista["advertencia"]
             assert vista["pendiente"]
             assert "texto" not in vista
+
+
+def test_todas_las_normas_del_json_pasaron_por_las_cargas():
+    """Ningún registro del JSON debe quedar fuera de _cargar_textos_literales.
+
+    Detecta el bug de orden de carga: si alguien agrega un registro a NORMAS
+    *después* de las llamadas de carga, el JSON tendrá el texto pero NORMAS
+    no lo habrá cargado. Este test lo hace visible.
+    """
+    import json
+    from pathlib import Path
+
+    ruta = Path(__file__).resolve().parent.parent / "app" / "data" / "normas_textos_literales.json"
+    datos_json = json.loads(ruta.read_text(encoding="utf-8"))
+
+    for nid, d in datos_json.items():
+        assert nid in NORMAS, f"{nid} está en el JSON pero no en NORMAS"
+        assert NORMAS[nid].get("texto_literal") == d["texto_literal"], (
+            f"{nid} tiene texto en el JSON pero NORMAS no lo cargó. "
+            f"¿Se agregó el registro después de _cargar_textos_literales()?"
+        )

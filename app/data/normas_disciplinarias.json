@@ -4,8 +4,10 @@
     "norma": "Ley 30057 - Ley del Servicio Civil",
     "articulo": "85",
     "inciso": "a",
-    "texto": "<<COPIAR LITERAL DESDE EL PERUANO>>",
-    "regimen": ["30057"],
+    "texto": "Art. 85 (encabezado): Son faltas de carácter disciplinario que, según su gravedad, pueden ser sancionadas con suspensión temporal o con destitución, previo proceso administrativo:\na) El incumplimiento de las normas establecidas en la presente Ley y su reglamento.",
+    "regimen": [
+      "30057"
+    ],
     "gatillos": [
       "OMISIÓN - NO ELABORACIÓN",
       "OMISIÓN - NO REMISIÓN",
@@ -23,8 +25,10 @@
     "norma": "Ley 30057 - Ley del Servicio Civil",
     "articulo": "85",
     "inciso": "d",
-    "texto": "<<COPIAR LITERAL>>",
-    "regimen": ["30057"],
+    "texto": "Art. 85 (encabezado): Son faltas de carácter disciplinario que, según su gravedad, pueden ser sancionadas con suspensión temporal o con destitución, previo proceso administrativo:\nd) La negligencia en el desempeño de las funciones.",
+    "regimen": [
+      "30057"
+    ],
     "gatillos": [
       "OMISIÓN - NO ELABORACIÓN",
       "OMISIÓN - NO REMISIÓN",
@@ -40,11 +44,16 @@
   },
   {
     "id": "TUO27444_DEBERES_AUTORIDADES",
-    "norma": "TUO de la Ley 27444 - Ley del Procedimiento Administrativo General",
-    "articulo": "<<VERIFICAR>>",
+    "norma": "TUO de la Ley 27444 - Ley del Procedimiento Administrativo General (DS 006-2026-JUS)",
+    "articulo": "75",
     "inciso": "",
-    "texto": "<<COPIAR LITERAL>>",
-    "regimen": ["30057", "276", "728", "CAS"],
+    "texto": "Artículo 75.- Deberes de las autoridades en los procedimientos\nSon deberes de las autoridades respecto del procedimiento administrativo y de sus partícipes, los siguientes:\n1. Actuar dentro del ámbito de su competencia y conforme a los fines para los que les fueron conferidas sus atribuciones.\n2. Desempeñar sus funciones siguiendo los principios del procedimiento administrativo previstos en el Título Preliminar de esta Ley.\n3. Encauzar de oficio el procedimiento, cuando advierta cualquier error u omisión de los administrados, sin perjuicio de la actuación que les corresponda a ellos.\n4. Abstenerse de exigir a los administrados el cumplimiento de requisitos, la realización de trámites, el suministro de información o la realización de pagos, no previstos legalmente.\n5. Realizar las actuaciones a su cargo en tiempo hábil, para facilitar a los administrados el ejercicio oportuno de los actos procedimentales de su cargo.\n6. Resolver explícitamente todas las solicitudes presentadas, salvo en aquellos procedimientos de aprobación automática.\n7. Velar por la eficacia de las actuaciones procedimentales, procurando la simplificación en sus trámites, sin más formalidades que las esenciales para garantizar el respeto a los derechos de los administrados o para propiciar certeza en las actuaciones.\n8. Interpretar las normas administrativas de forma que mejor atienda el fin público al cual se dirigen, preservando razonablemente los derechos de los administrados.\n9. Los demás previstos en la presente Ley o derivados del deber de proteger, conservar y brindar asistencia a los derechos de los administrados, con la finalidad de preservar su eficacia.\n10. Habilitar espacios idóneos para la consulta de expedientes y documentos, así como para la atención cómoda y ordenada del público, sin perjuicio del uso de medios con aplicación de tecnología de la información u otros similares",
+    "regimen": [
+      "30057",
+      "276",
+      "728",
+      "CAS"
+    ],
     "gatillos": [
       "INCUMPLIMIENTO DE PLAZO (ELABORACIÓN)",
       "INCUMPLIMIENTO DE PLAZO (REMISIÓN)"
@@ -53,6 +62,45 @@
     "preguntas_pendientes": [
       "¿Qué plazo del procedimiento administrativo se incumplió?"
     ],
+    "verificado": false
+  },
+  {
+    "id": "LEY27815_ART6",
+    "norma": "Ley 27815 - C?digo de ?tica de la Funci?n P?blica",
+    "articulo": "6",
+    "inciso": "",
+    "texto": "Artículo 6.- Principios de la Función Pública\n\nEl servidor público actúa de acuerdo a los siguientes principios:\n\n1. Respeto: Adecua su conducta hacia el respeto de la Constitución y las leyes, garantizando que en todas las fases del proceso de toma de decisiones o en el cumplimiento de los procedimientos administrativos, se respeten los derechos a la defensa y al debido procedimiento.\n\n2. Probidad: Actúa con rectitud, honradez y honestidad, procurando satisfacer el interés general y desechando todo provecho o ventaja personal, obtenido por sí o por interpósita persona.\n\n3. Eficiencia: Brinda calidad en cada una de las funciones a su cargo, procurando obtener una capacitación sólida y permanente.\n\n4. Idoneidad: Entendida como aptitud técnica, legal y moral, es condición esencial para el acceso y ejercicio de la función pública. El servidor público debe propender a una formación sólida acorde a la realidad, capacitándose permanentemente para el debido cumplimiento de sus funciones.\n\n5. Veracidad: Se expresa con autenticidad en las relaciones funcionales con todos los miembros de su institución y con la ciudadanía, y contribuye al esclarecimiento de los hechos.\n\n6. Lealtad y Obediencia: Actúa con fidelidad y solidaridad hacia todos los miembros de su institución, cumpliendo las órdenes que le imparta el superior jerárquico competente, en la medida que reúnan las formalidades del caso y tengan por objeto la realización de actos de servicio que se vinculen con las funciones a su cargo, salvo los supuestos de arbitrariedad o ilegalidad manifiestas, las que deberá poner en conocimiento del superior jerárquico de su institución.\n\n7. Justicia y Equidad: Tiene permanente disposición para el cumplimiento de sus funciones, otorgando a cada uno lo que le es debido, actuando con equidad en sus relaciones con el Estado, con el administrado, con sus superiores, con sus subordinados y con la ciudadanía en general.\n\n8. Lealtad al Estado de Derecho: El funcionario de confianza debe lealtad a la Constitución y al Estado de Derecho. Ocupar cargos de confianza en regímenes de facto, es causal de cese automático e inmediato de la función pública.",
+    "regimen": [
+      "30057"
+    ],
+    "gatillos": [],
+    "requiere_deber": false,
+    "verificado": false
+  },
+  {
+    "id": "LEY27815_ART7",
+    "norma": "Ley 27815 - C?digo de ?tica de la Funci?n P?blica",
+    "articulo": "7",
+    "inciso": "",
+    "texto": "Artículo 7.- Deberes de la Función Pública\n\nEl servidor público tiene los siguientes deberes:\n\n1. Neutralidad: Debe actuar con absoluta imparcialidad política, económica o de cualquier otra índole en el desempeño de sus funciones demostrando independencia a sus vinculaciones con personas, partidos políticos o instituciones.\n\n2. Transparencia: Debe ejecutar los actos del servicio de manera transparente, ello implica que dichos actos tienen en principio carácter público y son accesibles al conocimiento de toda persona natural o jurídica. El servidor público debe de brindar y facilitar información fidedigna, completa y oportuna.\n\n3. Discreción: Debe guardar reserva respecto de hechos o informaciones de los que tenga conocimiento con motivo o en ocasión del ejercicio de sus funciones, sin perjuicio de los deberes y las responsabilidades que le correspondan en virtud de las normas que regulan el acceso y la transparencia de la información pública.\n\n4. Ejercicio Adecuado del Cargo: Con motivo o en ocasión del ejercicio de sus funciones el servidor público no debe adoptar represalia de ningún tipo o ejercer coacción alguna contra otros servidores públicos u otras personas.\n\n5. Uso Adecuado de los Bienes del Estado: Debe proteger y conservar los bienes del Estado, debiendo utilizar los que le fueran asignados para el desempeño de sus funciones de manera racional, evitando su abuso, derroche o desaprovechamiento, sin emplear o permitir que otros empleen los bienes del Estado para fines particulares o propósitos que no sean aquellos para los cuales hubieran sido específicamente destinados.\n\n6. Responsabilidad: Todo servidor público debe desarrollar sus funciones a cabalidad y en forma integral, asumiendo con pleno respeto su función pública. Ante situaciones extraordinarias, el servidor público puede realizar aquellas tareas que por su naturaleza o modalidad no sean las estrictamente inherentes a su cargo, siempre que ellas resulten necesarias para mitigar, neutralizar o superar las dificultades que se enfrenten. Todo servidor público debe respetar los derechos de los administrados establecidos en el artículo 55 de la Ley N° 27444, Ley del Procedimiento Administrativo General.",
+    "regimen": [
+      "30057"
+    ],
+    "gatillos": [],
+    "requiere_deber": false,
+    "verificado": false
+  },
+  {
+    "id": "LEY27815_ART8",
+    "norma": "Ley 27815 - C?digo de ?tica de la Funci?n P?blica",
+    "articulo": "8",
+    "inciso": "",
+    "texto": "Artículo 8.- Prohibiciones Éticas de la Función Pública\n\nEl servidor público está prohibido de:\n\n1. Mantener Intereses de Conflicto: Mantener relaciones o de aceptar situaciones en cuyo contexto sus intereses personales, laborales, económicos o financieros pudieran estar en conflicto con el cumplimiento de los deberes y funciones a su cargo.\n\n2. Obtener Ventajas Indebidas: Obtener o procurar beneficios o ventajas indebidas, para sí o para otros, mediante el uso de su cargo, autoridad, influencia o apariencia de influencia.\n\n3. Realizar Actividades de Proselitismo Político: Realizar actividades de proselitismo político a través de la utilización de sus funciones o por medio de la utilización de infraestructura, bienes o recursos públicos, ya sea a favor o en contra de partidos u organizaciones políticas o candidatos.\n\n4. Hacer Mal Uso de Información Privilegiada: Participar en transacciones u operaciones financieras utilizando información privilegiada de la entidad a la que pertenece o que pudiera tener acceso a ella por su condición o ejercicio del cargo que desempeña, ni debe permitir el uso impropio de dicha información para el beneficio de algún interés.\n\n5. Presionar, Amenazar y/o Acosar: Ejercer presiones, amenazas o acoso sexual contra otros servidores públicos o subordinados que puedan afectar la dignidad de la persona o inducir a la realización de acciones dolosas.",
+    "regimen": [
+      "30057"
+    ],
+    "gatillos": [],
+    "requiere_deber": false,
     "verificado": false
   }
 ]
