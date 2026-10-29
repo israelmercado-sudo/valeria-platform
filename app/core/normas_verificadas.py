@@ -350,4 +350,91 @@ NORMAS.update({
 })
 
 
+# --- Relaciones de remisión disciplinaria ---
+# Registro estructural: no acredita por sí solo responsabilidad disciplinaria.
+
+for _id, _articulo, _tipo in (
+    ("LEY27815_ART6", "6", "principios"),
+    ("LEY27815_ART7", "7", "deberes"),
+    ("LEY27815_ART8", "8", "prohibiciones"),
+):
+    NORMAS.setdefault(_id, {
+        "id": _id,
+        "cita_completa": (
+            f"Ley 27815 - Código de Ética de la Función Pública, "
+            f"art. {_articulo}"
+        ),
+        "jurisdiccion": JURISDICCION_PE,
+        "texto_literal": None,
+        "url_fuente": None,
+        "fecha_consulta": None,
+        "verificado_por": None,
+        "vigencia": None,
+        "resumen_secundario": (
+            f"Artículo {_articulo}: { _tipo }. "
+            "Texto y vigencia pendientes de verificación oficial."
+        ),
+        "conductas_aplicables": [],
+        "conductas_validadas_por": None,
+        "sancionable_via": ["LEY30057_ART85_Q"],
+    })
+
+NORMAS["LEY30057_ART85_Q"].update({
+    "es_norma_de_remision": True,
+    "remite_a": [
+        "LEY27815_ART6",
+        "LEY27815_ART7",
+        "LEY27815_ART8",
+        "RGLEY30057_ART100",
+    ],
+})
+
+NORMAS["RGLEY30057_ART100"]["remite_a"] = [
+    "LEY27815_ART6",
+    "LEY27815_ART7",
+    "LEY27815_ART8",
+]
+
+
+def problemas_remision(norma: dict) -> list[str]:
+    """Comprueba la integridad estructural de las referencias normativas."""
+    problemas: list[str] = []
+
+    for campo in ("remite_a", "sancionable_via"):
+        destinos = norma.get(campo, [])
+
+        if not isinstance(destinos, list):
+            problemas.append(f"{campo} debe ser una lista")
+            continue
+
+        for destino in destinos:
+            if not isinstance(destino, str) or destino not in NORMAS:
+                problemas.append(f"{campo}: destino inexistente {destino}")
+
+    if norma.get("es_norma_de_remision") is True:
+        if not norma.get("remite_a"):
+            problemas.append("norma de remisión sin destinos")
+
+    return problemas
+
+
+# --- VERIFICACIONES (normas_verificaciones.json) ---
+# Solo copia los 4 campos de verificación. La decisión de "verificada"
+# sigue siendo de esta_verificada(); aquí no se marca nada a mano.
+def _cargar_verificaciones():
+    ruta = _Path(__file__).resolve().parent.parent / "data" / "normas_verificaciones.json"
+    if not ruta.exists():
+        return
+    with open(ruta, encoding="utf-8-sig") as f:
+        datos = _json.load(f)
+    for _id, d in datos.items():
+        n = NORMAS.get(_id)
+        if n is None:
+            continue
+        for campo in ("url_fuente", "fecha_consulta", "verificado_por", "vigencia"):
+            if campo in d:
+                n[campo] = d[campo]
+
+
 _cargar_textos_literales()
+_cargar_verificaciones()
