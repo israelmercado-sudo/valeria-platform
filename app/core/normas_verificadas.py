@@ -243,7 +243,7 @@ def _cargar_textos_literales():
     ruta = _Path(__file__).resolve().parent.parent / "data" / "normas_textos_literales.json"
     if not ruta.exists():
         return
-    with open(ruta, encoding="utf-8") as f:
+    with open(ruta, encoding="utf-8-sig") as f:
         datos = _json.load(f)
     for _id, d in datos.items():
         n = NORMAS.get(_id)
