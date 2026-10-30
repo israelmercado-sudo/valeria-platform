@@ -1,4 +1,5 @@
 ﻿import copy
+from datetime import date
 
 import pytest
 
@@ -20,7 +21,7 @@ def _norma_completa():
         "texto_literal": texto,
         "texto_sha256": sha_texto(texto),
         "url_fuente": "https://spij.minjus.gob.pe/ejemplo/norma",
-        "fecha_consulta": "2026-10-27",
+        "fecha_consulta": date.today().isoformat(),
         "verificado_por": "Revisor de prueba",
         "vigencia": {"vigente": True, "modificaciones": [], "derogada_por": None},
     }
