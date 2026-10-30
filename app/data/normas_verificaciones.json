@@ -174,5 +174,27 @@
       "derogada_por": null
     },
     "texto_sha256": "515167b7ee2e3e73d711425009ddef1cadccb7e64d6feffd0cf4593ee5c8a9c8"
+  },
+  "LEY30057_ART85_A": {
+    "url_fuente": "https://spijweb.minjus.gob.pe/wp-content/uploads/2024/03/LEY_30057.pdf",
+    "fecha_consulta": "2026-10-30",
+    "verificado_por": "Israel Mercado",
+    "vigencia": {
+      "vigente": true,
+      "modificaciones": [],
+      "derogada_por": null
+    },
+    "texto_sha256": "2f2bf5c63f82db7299086a1b6f50750a572932d122def27b584981c347834667"
+  },
+  "LEY30057_ART85_D": {
+    "url_fuente": "https://spijweb.minjus.gob.pe/wp-content/uploads/2024/03/LEY_30057.pdf",
+    "fecha_consulta": "2026-10-30",
+    "verificado_por": "Israel Mercado",
+    "vigencia": {
+      "vigente": true,
+      "modificaciones": [],
+      "derogada_por": null
+    },
+    "texto_sha256": "3314ca1a126e854fd16278f42ec3a31eee082ab0f5f034f8d3e8bfda4a50057a"
   }
 }
