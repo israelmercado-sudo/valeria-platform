@@ -7,7 +7,8 @@
       "vigente": true,
       "modificaciones": [],
       "derogada_por": null
-    }
+    },
+    "texto_sha256": "b069b40267764d530cbe4e34375e06cd084301e9710dcd68dac64d1b76bb6160"
   },
   "LEY27815_ART7": {
     "url_fuente": "https://www.gob.pe/institucion/congreso-de-la-republica/normas-legales/828190-27815",
@@ -17,7 +18,8 @@
       "vigente": true,
       "modificaciones": [],
       "derogada_por": null
-    }
+    },
+    "texto_sha256": "29c8079abcbfed797d4f72c76e09e40c1217778f3b65488b510e98a4b57045ba"
   },
   "LEY27815_ART8": {
     "url_fuente": "https://www.gob.pe/institucion/congreso-de-la-republica/normas-legales/828190-27815",
@@ -27,7 +29,8 @@
       "vigente": true,
       "modificaciones": [],
       "derogada_por": null
-    }
+    },
+    "texto_sha256": "3f296f141fc69ff95269ba73dc00b84f41eecb13de121a61e3f51e93dd01ddaa"
   },
   "LEY30057_ART85_Q": {
     "url_fuente": "https://www.congreso.gob.pe/Docs/DGP/DIDP/files/ley_30057.pdf",
@@ -37,7 +40,8 @@
       "vigente": true,
       "modificaciones": [],
       "derogada_por": null
-    }
+    },
+    "texto_sha256": "266bb260b7eb8e9581ac8201b9ef217d2727f55ca1c1599aab0fd0397b7a98d2"
   },
   "LEY30057_ART87": {
     "url_fuente": "https://www.congreso.gob.pe/Docs/DGP/DIDP/files/ley_30057.pdf",
@@ -47,7 +51,8 @@
       "vigente": true,
       "modificaciones": [],
       "derogada_por": null
-    }
+    },
+    "texto_sha256": "35a3d362e2fc8285d263fa76cac837d660e5487e266de7c4912a8b8dd446bcec"
   },
   "LEY30057_ART88": {
     "url_fuente": "https://www.congreso.gob.pe/Docs/DGP/DIDP/files/ley_30057.pdf",
@@ -57,7 +62,8 @@
       "vigente": true,
       "modificaciones": [],
       "derogada_por": null
-    }
+    },
+    "texto_sha256": "b1fde89a070dcc8fa454806437f1e763c959f1ddabe3d2ee3bcb468a5a536cf4"
   },
   "LEY30057_ART90": {
     "url_fuente": "https://www.congreso.gob.pe/Docs/DGP/DIDP/files/ley_30057.pdf",
@@ -67,7 +73,8 @@
       "vigente": true,
       "modificaciones": [],
       "derogada_por": null
-    }
+    },
+    "texto_sha256": "9a1d6baa7a18836483daaf60e13c37b07e636caa6700974bd883b16e0d289ed4"
   },
   "LEY30057_ART91": {
     "url_fuente": "https://www.congreso.gob.pe/Docs/DGP/DIDP/files/ley_30057.pdf",
@@ -77,7 +84,8 @@
       "vigente": true,
       "modificaciones": [],
       "derogada_por": null
-    }
+    },
+    "texto_sha256": "5460883a50165d42f97599b7d049b1bf11890c193f768a4509a9787c72375d32"
   },
   "LEY30057_ART92": {
     "url_fuente": "https://www.congreso.gob.pe/Docs/DGP/DIDP/files/ley_30057.pdf",
@@ -87,7 +95,8 @@
       "vigente": true,
       "modificaciones": [],
       "derogada_por": null
-    }
+    },
+    "texto_sha256": "5904796120ce0fc4ad82664a468de66f4f6a5bd894c252eb9042e14c4d359556"
   },
   "LEY30057_ART93": {
     "url_fuente": "https://www.congreso.gob.pe/Docs/DGP/DIDP/files/ley_30057.pdf",
@@ -97,7 +106,8 @@
       "vigente": true,
       "modificaciones": [],
       "derogada_por": null
-    }
+    },
+    "texto_sha256": "1569a3000b8456e47ea364556eed2d07f155f8feee36f0f145ce00f789cc286f"
   },
   "LEY30057_ART94": {
     "url_fuente": "https://www.congreso.gob.pe/Docs/DGP/DIDP/files/ley_30057.pdf",
@@ -107,7 +117,8 @@
       "vigente": true,
       "modificaciones": [],
       "derogada_por": null
-    }
+    },
+    "texto_sha256": "36cdac3988b85028ec02211cbb32c816548a6c1768c0366d7084562e465262fb"
   },
   "LEY30057_ART96": {
     "url_fuente": "https://www.congreso.gob.pe/Docs/DGP/DIDP/files/ley_30057.pdf",
@@ -117,7 +128,8 @@
       "vigente": true,
       "modificaciones": [],
       "derogada_por": null
-    }
+    },
+    "texto_sha256": "8971bbefbeb6c8733bdc4442c0c9385584dcda11002b36380a6ca3c93755e8d1"
   },
   "RGLEY30057_ART97_1": {
     "url_fuente": "https://www.gob.pe/institucion/pcm/normas-legales/24587-040-2014-pcm",
@@ -127,7 +139,8 @@
       "vigente": true,
       "modificaciones": [],
       "derogada_por": null
-    }
+    },
+    "texto_sha256": "c7c82d7141edd3f1270ff1962879614087e4939a91856bdeb0da39442b096110"
   },
   "RGLEY30057_ART100": {
     "url_fuente": "https://www.gob.pe/institucion/pcm/normas-legales/24587-040-2014-pcm",
@@ -137,7 +150,8 @@
       "vigente": true,
       "modificaciones": [],
       "derogada_por": null
-    }
+    },
+    "texto_sha256": "2622881027c67f0a33ddc2f87ec180b635bb3027567057e79cb87ce7c1b223d6"
   },
   "TUO27444_DEBERES_AUTORIDADES": {
     "url_fuente": "https://www.gob.pe/institucion/minjus/normas-legales/5421496-006-2026-jus",
@@ -147,7 +161,8 @@
       "vigente": true,
       "modificaciones": [],
       "derogada_por": null
-    }
+    },
+    "texto_sha256": "30b2faaf2f72dd184cb8877f26fd29cf4be42ebb33d649cc22fe65d609f7a5cb"
   },
   "TUO27444_ART239": {
     "url_fuente": "https://www.gob.pe/institucion/minjus/normas-legales/5421496-006-2026-jus",
@@ -157,6 +172,7 @@
       "vigente": true,
       "modificaciones": [],
       "derogada_por": null
-    }
+    },
+    "texto_sha256": "515167b7ee2e3e73d711425009ddef1cadccb7e64d6feffd0cf4593ee5c8a9c8"
   }
 }

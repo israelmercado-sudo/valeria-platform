@@ -473,7 +473,7 @@ def _cargar_verificaciones():
         n = NORMAS.get(_id)
         if n is None:
             continue
-        for campo in ("url_fuente", "fecha_consulta", "verificado_por", "vigencia"):
+        for campo in ("url_fuente", "fecha_consulta", "verificado_por", "vigencia", "texto_sha256"):
             if campo in d:
                 n[campo] = d[campo]
 

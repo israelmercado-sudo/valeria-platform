@@ -110,3 +110,14 @@ def test_todas_las_normas_del_json_pasaron_por_las_cargas():
             f"{nid} tiene texto en el JSON pero NORMAS no lo cargó. "
             f"¿Se agregó el registro después de _cargar_textos_literales()?"
         )
+
+
+def test_normas_con_verificado_por_estan_verificadas():
+    """Si una norma declara responsable, debe pasar todos los controles.
+
+    Detecta que un cambio en las reglas de verificacion deje sin efecto
+    normas ya contrastadas (p. ej. falta de texto_sha256).
+    """
+    for nid, n in NORMAS.items():
+        if n.get("verificado_por"):
+            assert esta_verificada(n), (nid, problemas_verificacion(n))
