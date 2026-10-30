@@ -7,15 +7,18 @@ from app.core.normas_verificadas import (
     como_candidata,
     esta_verificada,
     problemas_verificacion,
+    sha_texto,
 )
 
 
 def _norma_completa():
+    texto = "Texto completo de prueba sin marcadores."
     return {
         "id": "TEST_ART1",
         "cita_completa": "Norma de prueba, art. 1",
         "jurisdiccion": {"pais": "Perú", "ordenamiento": "Prueba"},
-        "texto_literal": "Texto completo de prueba sin marcadores.",
+        "texto_literal": texto,
+        "texto_sha256": sha_texto(texto),
         "url_fuente": "https://spij.minjus.gob.pe/ejemplo/norma",
         "fecha_consulta": "2026-10-27",
         "verificado_por": "Revisor de prueba",

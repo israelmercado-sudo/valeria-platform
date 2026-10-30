@@ -14,7 +14,17 @@ from __future__ import annotations
 import re
 from datetime import date
 
+import hashlib
+import logging
+from urllib.parse import urlparse
+
 MARCADORES_PLACEHOLDER = ("...", "…", "<<VERIFICAR>>", "TODO", "XXX", "PENDIENTE")
+
+_log = logging.getLogger(__name__)
+
+MAX_ANTIGUEDAD_DIAS = 180
+DOMINIOS_OFICIALES = ("spij.minjus.gob.pe", "elperuano.pe", "gob.pe")
+_RE_PH = re.compile(r"\.\.\.|\u2026|<<VERIFICAR>>|\b(?:TODO|XXX|PENDIENTE)\b")
 
 CAMPOS_OBLIGATORIOS = (
     "id",
@@ -138,10 +148,23 @@ NORMAS = {
 }
 
 
-def _tiene_placeholder(valor) -> bool:
-    if isinstance(valor, str):
-        return any(m in valor for m in MARCADORES_PLACEHOLDER)
+def _tiene_placeholder(v) -> bool:
+    if isinstance(v, str):
+        return bool(_RE_PH.search(v))
+    if isinstance(v, dict):
+        return any(_tiene_placeholder(x) for x in v.values())
+    if isinstance(v, (list, tuple)):
+        return any(_tiene_placeholder(x) for x in v)
     return False
+
+
+def _url_oficial(url) -> bool:
+    h = (urlparse(url).hostname or "").lower()
+    return any(h == d or h.endswith("." + d) for d in DOMINIOS_OFICIALES)
+
+
+def sha_texto(t: str) -> str:
+    return hashlib.sha256(t.strip().encode("utf-8")).hexdigest()
 
 
 def _url_valida(url) -> bool:
@@ -177,6 +200,25 @@ def problemas_verificacion(norma: dict) -> list[str]:
             p.append("vigencia no confirmada como vigente")
     elif vig not in (None, "", {}):
         p.append("vigencia debe ser un dict")
+        
+    url = norma.get("url_fuente")
+    if url and _url_valida(url) and not _url_oficial(url):
+        p.append("url_fuente no pertenece a un dominio oficial")
+
+    if _fecha_valida(norma.get("fecha_consulta")):
+        edad = (date.today() - date.fromisoformat(norma["fecha_consulta"])).days
+        if edad < 0:
+            p.append("fecha_consulta en el futuro")
+        elif edad > MAX_ANTIGUEDAD_DIAS:
+            p.append("verificación vencida, reconsultar")
+
+    if isinstance(vig, dict) and vig.get("derogada_por"):
+        p.append("norma con derogación registrada")
+
+    if norma.get("texto_literal") and norma.get("url_fuente"):
+        if norma.get("texto_sha256") != sha_texto(norma["texto_literal"]):
+            p.append("texto_literal no coincide con el texto contrastado")
+        
     return p
 
 
