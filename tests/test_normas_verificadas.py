@@ -121,3 +121,21 @@ def test_normas_con_verificado_por_estan_verificadas():
     for nid, n in NORMAS.items():
         if n.get("verificado_por"):
             assert esta_verificada(n), (nid, problemas_verificacion(n))
+
+
+def test_alterar_texto_invalida_verificacion():
+    """Si cambia el texto literal o falta el hash, la norma deja de estar verificada."""
+    import copy
+    from app.core.normas_verificadas import NORMAS, esta_verificada, problemas_verificacion
+
+    verificadas = [n for n in NORMAS.values() if esta_verificada(n)]
+    assert verificadas, "No hay normas verificadas para probar"
+    for n in verificadas:
+        alterada = copy.deepcopy(n)
+        alterada["texto_literal"] = n["texto_literal"] + " (alterado)"
+        assert not esta_verificada(alterada), n["id"]
+        assert "texto_literal no coincide con el texto contrastado" in problemas_verificacion(alterada), n["id"]
+
+        sin_hash = copy.deepcopy(n)
+        sin_hash["texto_sha256"] = None
+        assert not esta_verificada(sin_hash), n["id"]
